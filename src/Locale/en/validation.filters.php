@@ -26,14 +26,13 @@ return array(
     'requiredIf'  => false,      // required if other key has value
     'loopBreak'   => true,       // done, skip validations if value is empty.
     'code'        => false,
-    'maxlength'   => false,
+    'maxLength'   => false,
     'pattern'     => false,      // checks pattern with preg_match.
     'matches'     => false,      // preg_match with default types.
     'kanaType'    => false,      // checks kana-types, hiragana, katakana, etc. 
     'min'         => false,
     'max'         => false,
     'range'       => false,
-    'checkdate'   => false,
     'sameWith'    => false,      // comparing with other field.
     'sameAs'      => false,
     'sameEmpty'   => false,

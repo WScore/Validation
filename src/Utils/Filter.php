@@ -113,14 +113,23 @@ class Filter
      * check for valid date-time input string.
      *
      * @param ValueTO $v
+     * @param bool|string $p
      */
-    public function filter_datetime($v)
+    public function filter_datetime($v, $p)
     {
         try {
-            new \DateTime($v);
+            if (is_bool($p) && $p) {
+                $p = 'Y-m-d H:i:s';
+            }
+            $dt = \DateTime::createFromFormat($p, $v->getValue());
+            if ($dt) {
+                $v->setValue($dt->format($p));
+                return;
+            }
         } catch (\Exception $e) {
-            $v->setValue('');
         }
+        $v->setValue('');
+        $v->setError(__METHOD__, $p);
     }
 
     /**
@@ -336,6 +345,17 @@ class Filter
         if ($val < (int)$p) {
             $v->setError(__METHOD__);
         }
+    }
+
+    /**
+     * @param ValueTO    $v
+     * @param string|int $p
+     */
+    public function filter_maxLength($v, $p)
+    {
+        if (mb_strlen($v) > $p) {
+            $v->setError(__METHOD__, $p);
+        }        
     }
     // +----------------------------------------------------------------------+
 }

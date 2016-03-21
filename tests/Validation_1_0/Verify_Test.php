@@ -212,4 +212,31 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals( 'test:bad', $valTo->getValue() );
         $this->assertEquals( 'Closure with Error', $valTo->message() );
     }
+
+    /**
+     * @test
+     */
+    function datetime_converts_to_standard_format_YmdHis()
+    {
+        $get = $this->verify->is('2016-02-28 12:23:34', ['datetime' => 'Y-m-d H:i:s']);
+        $this->assertEquals('2016-02-28 12:23:34', $get);
+
+        $get = $this->verify->is('2016-02-30', ['datetime' => 'Y-m-d']);
+        $this->assertEquals('2016-03-01', $get);
+
+        $get = $this->verify->is('12:34:45', ['datetime' => 'H:i:s']);
+        $this->assertEquals('12:34:45', $get);
+    }
+
+    /**
+     * @test
+     */
+    function maxLength()
+    {
+        $get = $this->verify->is('12345', ['maxlength' => 5]);
+        $this->assertEquals('12345', $get);
+
+        $get = $this->verify->is('123456', ['maxLength' => 5]);
+        $this->assertFalse($get);
+    }
 }
