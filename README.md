@@ -21,7 +21,7 @@ Use composer. only dev-master is available...
 
 ```json
 "require": {
-    "wscore/validation": "dev-master"
+    "wscore/validation": "^1.0"
 }
 ```
 
@@ -29,42 +29,39 @@ Use composer. only dev-master is available...
 Simple Usage
 ------------
 
-This package **almost** works like this.
-
 ### factory object
 
-Use ```ValidationFactory``` to start validating an array.
+Use `ValidationFactory` to start validating an array.
 For instance, 
 
 ```php
 use \WScore\Validation\ValidationFactory;
 
 $factory = new ValidationFactory();    // use English rules and messages.
-$factory = new ValidationFactory('ja); // use Japanese rules and messages.
+$factory = new ValidationFactory('ja'); // use Japanese rules and messages.
 ```
 
 to validate an array, 
 
 ```php
 $input = $factory->on($_POST);
-$input->asText('name');
-$input->asInteger('age');
-$input->asDate('bate');
-if($v->fails()) {
-   $messages = $input->messages();
+$input->asText('name')->required(); // set rule on 'name'.  
+$age = $input->asInteger('age')->range([10, 70]); // set rule on age and get the value. 
+if($input->fails()) {
+   $messages = $input->messages(); // get error messages
 }
-$values = $input->get();
+$values = $input->get(); // get all the value. 
 ```
 
 
-### validation rule
+### validation types
 
-The ```as{Type}($name)``` method sets default rules for the input ```$name```. Use method chaing to add more rules. 
+The `as{Type}($name)` method sets default rules for the input `$name`. Use method chains to add more rules. 
 
 ```php
-$input = $factory->on( $_POST );   // get validator.
-$input->asText('name')->required() );
-$input->asMail('mail')->required()->sameWith('mail2'));
+$input = $factory->on($_POST);   // get validator.
+$input->asText('name')->required();
+$input->asMail('mail')->required()->confirm('mail2'));
 $found = $input->get(); // [ 'name' => some name... ]
 if( $input->fails() ) {
     $onlyGoodData    = $input->getSafe();
@@ -74,22 +71,63 @@ if( $input->fails() ) {
 }
 ```
 
-Check if the validation failes or not using ```fails()```
- method (or ```passess()``` method).
+Check the validation result by using `fails()` method (or `passes()` method).
 
-To retrieve the validated (or unvalidated) values
- by ```get()``` method, which returns all the values
- (validated and invalidated values).
+The `get()` method retrieves the validated as well as invalidated values.
+To retrieve __only the validated values__, use ```getSafe()``` method.
 
-To retrieve __only the validated values__,
- use ```getSafe()``` method.
+The predefined types are:
 
+* binary
+* text
+* mail
+* number
+* integer
+* float
+* date
+* dateYM
+* datetime
+* time
+* timeHi
+* tel
+* fax
+
+which are defined in `Locale/{locale}/validation.types.php` file.
+
+### filter types
+
+Available filter (or rules) types. 
+
+ * `message(string $message)`:     set error message.
+ * `multiple(array $parameter)`:   set multiple field inputs, such as Y, m, and d. 
+ * `array()`:                      allows array input.
+ * `noNull(bool $not = true)`:     removes null character. 
+ * `encoding(string $encoding)`:   validates on character encoding (default is UTF-8). 
+ * `mbConvert(string $type)`:      converts kana-set (in Japanese). 
+ * `trim(bool $trim = true)`:      trims input string. 
+ * `sanitize(string $type)`:       sanitize value. 
+ * `string(string $type)`:         converts string to upper/lower/etc. 
+ * `default(string $value)`:       sets default value if not set. 
+ * `required(bool $required = true)`:          required value
+ * `requiredIf(string $key, array $in=[])`:    set required if $key exists (or in $in). 
+ * `loopBreak(bool $break = true)`:            breaks filter loop. 
+ * `code(string $type)`:           
+ * `maxLength(int $length)`:           maximum character length. 
+ * `pattern(string $reg_expression)`:  preg_match pattern
+ * `matches(string $match_type)`:      preset regex patterns (number, int, float, code, mail).
+ * `kanaType(string $match_type)`:     checks kana-type ().
+ * `min(int $min)`:                    minimum numeric value.
+ * `max(int $max)`:                    maximum numeric value.
+ * `range(array $range)`:              range of [min, max].
+ * `datetime(string|bool $format = true)`:    checks for datetime with format. 
+ * `in(array $choices)`:               checks for list of possible values. 
+ * `confirm(string $key)`:             confirm against another $key. 
 
 ### validating a single value
 
 ##### rewrite-this-section.
 
-Use ```verify``` method to validate a single value.
+Use `verify` method to validate a single value.
 
 ```php
 $name  = $input->verify( 'WScore', Rules::text()->string('lower') ); // returns 'wscore'
@@ -109,7 +147,7 @@ Validating an array of data is easy. When the validation fails,
 
 ```php
 $input->source( array( 'list' => [ '1', '2', 'bad', '4' ] ) );
-$input->asInteger('list');
+$input->asInteger('list')->array();
 if( !$input->passes() ) {
     $values = $validation->get('list');
     $goods  = $validation->getSafe();
@@ -141,8 +179,8 @@ $input->asText('ranges')->multiple( [
 ] );
 ```
 
-where ```suffix``` lists the postfix for the inputs,
-and ```format``` is the format string using sprintf.
+where `suffix` lists the postfix for the inputs,
+and `format` is the format string using sprintf.
 
 
 ### sameWith to compare values
@@ -194,7 +232,7 @@ argument is the ValueTO object which can be used to handle
 error and messages.
 
 setting error with, well, actually, any string,
-but ```__METHOD__``` maybe helpful. this will break the
+but `__METHOD__` maybe helpful. this will break the
 filter loop, i.e. no filter will be evaluated.
 
 
@@ -221,7 +259,7 @@ echo $validate->result()->message(); // 'Oops!'
 
 ### example 2) method and parameter specific message
 
-filter, ```matches``` has its message based on the parameter. 
+filter, `matches` has its message based on the parameter. 
 
 ```php
 $validate->verify( '', Rules::text()->required()->matches('code') );
@@ -230,7 +268,7 @@ echo $validate->result()->message(); // 'only alpha-numeric characters'
 
 ### example 3 ) method specific message
 
-filters such as ```required``` and ```sameWith``` has message.
+filters such as `required` and `sameWith` has message.
 And lastly, there is a generic message for general errors. 
 
 ```php
@@ -253,44 +291,3 @@ uses generic message, if all of the above rules fails.
 $validate->verify( '123', Rules::text()->pattern('[abc]') );
 echo $validate->result()->message(); // 'invalid input'
 ```
-
-Predefined Types
-----------------
-
-todo: to-be-written
-
-*   text
-*   mail
-*   number
-*   integer
-*   float
-*   date
-*   dateYM
-*   datetime
-*   time
-*   timeHi
-*   tel
-
-Predefined Filters
-------------------
-
-todo: to-be-write
-
-*   message
-*   multiple
-*   noNull
-*   encoding
-*   mbConvert (Ja only)
-*   trim
-*   sanitize
-*   string
-*   default
-*   required
-*   loopBreak
-*   code
-*   maxlength
-*   pattern
-*   matches
-*   kanaType (ja only)
-*   etc.
-
