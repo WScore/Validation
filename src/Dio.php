@@ -171,6 +171,7 @@ class Dio
             return $this->found[$key];
         }
         $rules = array_key_exists($key, $this->rules) ? $this->rules[$key] : $this->ruler->withType('text');
+        $rules = $this->setupRules($rules);
         $found = $this->find($key, $rules);
         $valTO = $this->verify->apply($found, $rules);
 
@@ -302,31 +303,45 @@ class Dio
     }
 
     /**
-     * finds a value with $name in the source data, applying the rules.
+     * finds a value with $name in the source data.
      *
      * @param string      $name
      * @param array|Rules $rules
      * @return string
      */
-    public function find($name, &$rules = [])
+    public function find($name, $rules = [])
     {
         // find a value from data source.
         $value = null;
         if (Utils\Helper::arrGet($rules, 'multiple')) {
             // check for multiple case i.e. Y-m-d.
-            $value = Utils\Helper::prepare_multiple($name, $this->source, $rules['multiple']);
+            return Utils\Helper::prepare_multiple($name, $this->source, $rules['multiple']);
         }
-        if (!$value && array_key_exists($name, $this->source)) {
+        if (array_key_exists($name, $this->source)) {
             // simplest case.
             $value = $this->source[$name];
         }
+
+        return $value;
+    }
+
+    /**
+     * set up rules; 
+     * - add required rule based on requiredIf rule.
+     * - add sameAs rule based on sameWith rule. 
+     * 
+     * @param array|Rules $rules
+     * @return array|Rules
+     */
+    private function setupRules($rules)
+    {
         // prepares filter for requiredIf
         $rules = Utils\Helper::prepare_requiredIf($this, $rules);
-        
+
         // prepares filter for sameWith.
         $rules = Utils\Helper::prepare_sameWith($this, $rules);
 
-        return $value;
+        return $rules;
     }
     // +----------------------------------------------------------------------+
 }

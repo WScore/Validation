@@ -36,8 +36,9 @@ use Traversable;
  * @method Rules range(array $range)
  * @method Rules checkdate(bool $check = true)
  * @method Rules in(array $choices)
- * @method Rules sameWith(string $name)
- * @method Rules sameAs(string $name)
+ * @method Rules confirm(string $key)     same as sameWith
+ * @method Rules sameWith(string $key)
+ * @method Rules sameAs(string $value)
  * @method Rules sameEmpty(bool $check = true)
  *
  */
@@ -172,6 +173,11 @@ class Rules implements \ArrayAccess, \IteratorAggregate
         return $this;
     }
 
+    public $convertRules = [
+        'confirm' => 'sameWith',
+        'err_msg' => 'message',
+    ];
+    
     /**
      * @param $rule
      * @param $args
@@ -186,6 +192,7 @@ class Rules implements \ArrayAccess, \IteratorAggregate
         } else {
             $value = $args;
         }
+        $rule = array_key_exists($rule, $this->convertRules) ? $this->convertRules[$rule] : $rule;
         $this->filter[$rule] = $value;
 
         return $this;
