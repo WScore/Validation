@@ -321,6 +321,9 @@ class Dio
             // simplest case.
             $value = $this->source[$name];
         }
+        if (is_array($value) && !Utils\Helper::arrGet($rules, 'array')) {
+            return '';
+        }
 
         return $value;
     }

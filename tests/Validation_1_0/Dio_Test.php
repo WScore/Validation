@@ -109,7 +109,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $test = array( 'tested', 'more test' );
         $source = array( 'test' => $test );
         $this->validate->source( $source );
-        $this->validate->asText( 'test' );
+        $this->validate->asText( 'test' )->array();
         $got = $this->validate->get('test');
 
         $this->assertEquals( $test, $got );
@@ -128,7 +128,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $source = array( 'test' => $test );
         $collect = array( 'test' => array( 0=>'123', 2=>'456') );
         $this->validate->source( $source );
-        $this->validate->asNumber( 'test' );
+        $this->validate->asNumber( 'test' )->array();
         $got = $this->validate->get('test');
 
         // should return the input

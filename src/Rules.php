@@ -11,34 +11,35 @@ use Traversable;
 
 /**
  * @method Rules err_msg(string $error_message)
- * @method Rules message(string $message)
- * @method Rules multiple(array $parameter)
- * @method Rules noNull(bool $not = true)
- * @method Rules encoding(string $encoding)
- * @method Rules mbConvert(string $type)
- * @method Rules trim(bool $trim = true)
- * @method Rules sanitize(string $type)
- * @method Rules string(string $type)
+ * @method Rules message(string $message)     set error message.
+ * @method Rules multiple(array $parameter)   set multiple field inputs, such as Y, m, and d. 
+ * @method Rules array()                      allows array input.
+ * @method Rules noNull(bool $not = true)     removes null character. 
+ * @method Rules encoding(string $encoding)   validates on character encoding (default is UTF-8). 
+ * @method Rules mbConvert(string $type)      converts kana-set (in Japanese). 
+ * @method Rules trim(bool $trim = true)      trims input string. 
+ * @method Rules sanitize(string $type)       sanitize value. 
+ * @method Rules string(string $type)         converts string to upper/lower/etc. 
  * @method Rules custom(\Closure $filter)
  * @method Rules custom2(\Closure $filter)
  * @method Rules custom3(\Closure $filter)
- * @method Rules default(string $value)
- * @method Rules required(bool $required = true)
- * @method Rules requiredIf(string $key, array $in=[])
- * @method Rules loopBreak(bool $break = true)
- * @method Rules code(string $type)
- * @method Rules maxLength(int $length)
- * @method Rules pattern(string $reg_expression)
- * @method Rules matches(string $match_type)
- * @method Rules kanaType(string $match_type)
- * @method Rules min(int $min)
- * @method Rules max(int $max)
- * @method Rules range(array $range)
- * @method Rules datetime(bool $check = true)
- * @method Rules in(array $choices)
- * @method Rules confirm(string $key)     same as sameWith
- * @method Rules sameWith(string $key)
- * @method Rules sameAs(string $value)
+ * @method Rules default(string $value)       sets default value if not set. 
+ * @method Rules required(bool $required = true)          required value
+ * @method Rules requiredIf(string $key, array $in=[])    set required if $key exists (or in $in). 
+ * @method Rules loopBreak(bool $break = true)            breaks filter loop. 
+ * @method Rules code(string $type)           
+ * @method Rules maxLength(int $length)           maximum character length. 
+ * @method Rules pattern(string $reg_expression)  preg_match pattern
+ * @method Rules matches(string $match_type)      preset regex patterns (number, int, float, code, mail).
+ * @method Rules kanaType(string $match_type)     checks kana-type ().
+ * @method Rules min(int $min)                    minimum numeric value.
+ * @method Rules max(int $max)                    maximum numeric value.
+ * @method Rules range(array $range)              range of [min, max].
+ * @method Rules datetime(bool $format = true)    checks for datetime with format. 
+ * @method Rules in(array $choices)               checks for list of possible values. 
+ * @method Rules confirm(string $key)             same as sameWith
+ * @method Rules sameWith(string $key)            confirm against another $key. 
+ * @method Rules sameAs(string $value)            compare against $value.
  * @method Rules sameEmpty(bool $check = true)
  *
  */

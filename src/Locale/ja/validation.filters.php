@@ -10,6 +10,7 @@ return array(
     'type'        => null,       // type of filter, such as 'text', 'mail', etc.
     'message'     => false,
     'multiple'    => false,      // multiple value.
+    'array'       => false,      // allow array input.
     'noNull'      => true,       // filters out NULL (\0) char from the value.
     'encoding'    => 'UTF-8',    // checks the encoding of value.
     'mbConvert'   => 'standard', // converts Kana set (Japanese)
