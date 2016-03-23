@@ -15,9 +15,11 @@ Features includes, such as:
 
 MIT License
 
-### Installation
+### PSR
 
-Use composer. only dev-master is available...
+PSR-1, PSR-2, and PSR-4. 
+
+### Installation
 
 ```json
 "require": {
@@ -48,8 +50,8 @@ $input = $factory->on($_POST); // create a validator object.
 to validate an array, 
 
 ```php
-$input->set('name', $input->isText()->required()); // set rule on 'name'.  
-$age = $input->get('age', $input->isInteger()->range([10, 70])); // set rule on age and get the value. 
+$input->set('name', $input->isText->required()); // set rule on 'name'.  
+$age = $input->get('age', $input->isInteger->range([10, 70])); // set rule on age and get the value. 
 if ($input->fails()) {
     $messages = $input->messages(); // get error messages
     $badInputs = $input->getAll(); // get all the value including invalidated one. 
@@ -65,11 +67,11 @@ $goodInputs = $input->getSafe(); // get only the validated value.
 
 ### types
 
-Use `set` method with `is{Type}` rules, or use `as{Type}($name)` method 
+Use `set` method with `is{Type}` property, or use `as{Type}($name)` method 
 as a shorthand method to set validation rules for the input `$name`. 
 
 ```php
-$input->set('name', $input->isText()->required()); // proper code.
+$input->set('name', $input->isText->required()); // proper code.
 $input->asText('name')->required();                // shorter code.
 $input->asMail('mail')->required()->confirm('mail2'));
 ```
@@ -200,8 +202,8 @@ They become identical after lowering the strings.
 some filter must be applied in certain order... 
 
 ```php
-echo $validate->verify( 'ABC', Rules::text()->pattern('[a-c]*')->string('lower'); // 'abc'
-## should lower the string first, then check for pattern...
+echo $input->get( 'ABC', $input->isText->pattern('[a-c]*')->string('lower'); // 'abc'
+# must lower the string first, then check for pattern...
 ```
 
 
@@ -231,6 +233,20 @@ setting error with, well, actually, any string,
 but `__METHOD__` maybe helpful. this will break the
 filter loop, i.e. no filter will be evaluated.
 
+### setting values and errors
+
+To set a value, or an error to the validator, use `setValue` and `setError` methods. 
+ 
+```php
+$input->setValue('extra', 'good'); // set some value.
+$input->setError('bad', 'why it is bad...');  // set error. 
+if ($input->fails()) {
+    echo $input->getAll()['extra'];  // 'good' 
+    echo $input->getMessages('bad'); // 'why it is bad...'
+}
+```
+
+Setting error will make `fails()` method to return `true`. 
 
 
 Predefined Messages
@@ -246,11 +262,11 @@ Error message is determined as follows:
 
 ### example 1) message to specify by message rule
 
-for tailored message, use ```message``` method to set its messag.e
+for tailored message, use `message` method to set its message.
 
 ```php
-$validate->verify( '', $rule('text')->required()->message('Oops!') );
-echo $validate->result()->message(); // 'Oops!'
+$input->set('text', $input->isText->required()->message('Oops!'));
+echo $input->getMessage('text'); // 'Oops!'
 ```
 
 ### example 2) method and parameter specific message
@@ -258,8 +274,8 @@ echo $validate->result()->message(); // 'Oops!'
 filter, `matches` has its message based on the parameter. 
 
 ```php
-$validate->verify( '', Rules::text()->required()->matches('code') );
-echo $validate->result()->message(); // 'only alpha-numeric characters'
+$input->set('text', $input->isText->matches('code'));
+echo $input->getMessage('code'); // 'only alpha-numeric characters'
 ```
 
 ### example 3 ) method specific message
@@ -268,15 +284,15 @@ filters such as `required` and `sameWith` has message.
 And lastly, there is a generic message for general errors. 
 
 ```php
-$validate->verify( '', $rule('text')->required() );
-echo $validate->result()->message(); // 'required input'
+$validate->verify( 'text', $rule('text')->required() );
+echo $input->getMessage('text'); // 'required input'
 ```
 
 ### example 4) type specific message
 
 ```php
-$validate->verify( '', Rules::date()->required() );
-echo $validate->result()->message(); // 'invalid date'
+$input->set('text', $input->isDate->required());
+echo $input->getMessage('date'); // 'invalid date'
 ```
 
 ### example 5) general message
@@ -284,6 +300,6 @@ echo $validate->result()->message(); // 'invalid date'
 uses generic message, if all of the above rules fails.
 
 ```php
-$validate->verify( '123', Rules::text()->pattern('[abc]') );
-echo $validate->result()->message(); // 'invalid input'
+$input->set('text', $input->pattern('[abc]'));
+echo $input->getMessage('text'); // 'invalid input'
 ```

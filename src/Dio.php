@@ -21,18 +21,18 @@ namespace WScore\Validation;
  * @method Rules asTime(string $key)
  * @method Rules asTimeHi(string $key)
  * @method Rules asTel(string $key)
- * @method Rules isText()
- * @method Rules isMail()
- * @method Rules isBinary()
- * @method Rules isNumber()
- * @method Rules isInteger()
- * @method Rules isFloat()
- * @method Rules isDate()
- * @method Rules isDatetime()
- * @method Rules isDateYM()
- * @method Rules isTime()
- * @method Rules isTimeHi()
- * @method Rules isTel()
+ * @property Rules isText
+ * @property Rules isMail
+ * @property Rules isBinary
+ * @property Rules isNumber
+ * @property Rules isInteger
+ * @property Rules isFloat
+ * @property Rules isDate
+ * @property Rules isDatetime
+ * @property Rules isDateYM
+ * @property Rules isTime
+ * @property Rules isTimeHi
+ * @property Rules isTel
  */
 class Dio
 {
@@ -141,6 +141,19 @@ class Dio
         }
         if (substr($method, 0, 2) === 'is') {
             $type = strtolower(substr($method, 2));
+            return $this->ruler->withType($type);
+        }
+        throw new \BadMethodCallException;
+    }
+
+    /**
+     * @param string $name
+     * @return Rules
+     */
+    public function __get($name)
+    {
+        if (substr($name, 0, 2) === 'is') {
+            $type = strtolower(substr($name, 2));
             return $this->ruler->withType($type);
         }
         throw new \BadMethodCallException;

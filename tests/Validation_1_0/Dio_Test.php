@@ -41,7 +41,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $source = ['test' => 'tested', 'more' => 'tested', 'extra' => 'tested'];
         $input  = $this->factory->on($source);
         $this->assertEquals('tested', $input->get('test'));
-        $this->assertEquals('tested', $input->get('more', $input->isText()));
+        $this->assertEquals('tested', $input->get('more', $input->isText));
         $this->assertEquals('tested', $input->get('extra', $input->getRule('text')));
         $this->assertEquals('', $input->get('none', $input->getRule('text')));
         $this->assertEquals(['more' => 'tested', 'extra' => 'tested', 'none' => ''], $input->getAll());
@@ -57,9 +57,9 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $source = ['test' => 'tested', 'more' => 'tested', 'extra' => 'tested'];
         $input  = $this->factory->on($source);
         $input->set('test')
-            ->set('more', $input->isText())
+            ->set('more', $input->isText)
             ->set('extra', $input->getRule('text'))
-            ->set('none', $input->isText());
+            ->set('none', $input->isText);
         $this->assertEquals(['more' => 'tested', 'extra' => 'tested', 'none' => ''], $input->getAll());
         $this->assertFalse($input->fails());
         $this->assertTrue($input->passes());
@@ -89,8 +89,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = ['test' => 'tested'];
         $input = $this->factory->on($source);
-        $input->set('test', $input->isText()->required())
-            ->set('none', $input->isText()->required());
+        $input->set('test', $input->isText->required())
+            ->set('none', $input->isText->required());
 
         $this->assertTrue($input->fails());
         $this->assertFalse($input->passes());
@@ -108,8 +108,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = ['test' => 'tested', 'bad' => 'b@d'];
         $input = $this->factory->on($source);
-        $input->set('test', $input->isText()->required())
-              ->set('bad',  $input->isText()->required()->pattern('[a-z]+')->message('bad pattern'));
+        $input->set('test', $input->isText->required())
+              ->set('bad',  $input->isText->required()->pattern('[a-z]+')->message('bad pattern'));
 
         $this->assertTrue($input->fails());
         $this->assertFalse($input->passes());
@@ -130,7 +130,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $test = array( 'tested', 'more test' );
         $source = array( 'test' => $test );
         $input = $this->factory->on($source );
-        $got = $input->get('test', $input->isText()->array());
+        $got = $input->get('test', $input->isText->array());
 
         $this->assertEquals( $test, $got );
         $this->assertEquals( $test, $input->get('test') );
@@ -147,7 +147,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $test = array( 'tested', 'more test' );
         $source = array( 'test' => $test );
         $input = $this->factory->on($source );
-        $got = $input->get('test', $input->isText());
+        $got = $input->get('test', $input->isText);
 
         $this->assertEquals( '', $got );
         $this->assertEquals( '', $input->get('test') );
@@ -166,7 +166,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $collect = array( 'test' => array( 0=>'123', 2=>'456') );
         $input = $this->factory->on($source );
 
-        $input->set('test', $input->isNumber()->array());
+        $input->set('test', $input->isNumber->array());
 
         // should return the input
         $this->assertEquals( false, $input->get('test') );
