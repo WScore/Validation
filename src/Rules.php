@@ -13,7 +13,7 @@ use Traversable;
  * @method Rules err_msg(string $error_message)
  * @method Rules message(string $message)     set error message.
  * @method Rules multiple(array $parameter)   set multiple field inputs, such as Y, m, and d. 
- * @method Rules array()                      allows array input.
+ * @method Rules array()                      allows array input. ignores array input if not set.
  * @method Rules noNull(bool $not = true)     removes null character. 
  * @method Rules encoding(string $encoding)   validates on character encoding (default is UTF-8). 
  * @method Rules mbConvert(string $type)      converts kana-set (in Japanese). 

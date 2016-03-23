@@ -98,44 +98,12 @@ class Dio
     }
 
     /**
-     * @param $name
-     * @param $type
-     * @return Rules
-     * @deprecated
-     */
-    private function setRule($name, $type)
-    {
-        $this->rules[$name] = $this->ruler->withType($type);
-        $this->isEvaluated = false;
-
-        return $this->rules[$name];
-    }
-
-    /**
      * @param string $type
      * @return Rules
      */
     public function getRule($type)
     {
         return $this->ruler->withType($type);
-    }
-
-    /**
-     * pushes the $name.
-     * returns the found value, or false if validation fails.
-     *
-     * @param string      $name
-     * @param array|Rules $rules
-     * @throws \InvalidArgumentException
-     * @return mixed
-     * @deprecated
-     */
-    public function is($name, $rules)
-    {
-        $this->rules[$name] = $rules;
-        $this->isEvaluated = false;
-
-        return $this->evaluateAndGet($name);
     }
 
     /**
@@ -166,9 +134,10 @@ class Dio
     {
         if (substr($method, 0, 2) === 'as') {
             $type = strtolower(substr($method, 2));
-            $name = $args[0];
-
-            return $this->setRule($name, $type);
+            $key  = $args[0];
+            $rule = $this->ruler->withType($type);
+            $this->set($key, $rule);
+            return $rule;
         }
         if (substr($method, 0, 2) === 'is') {
             $type = strtolower(substr($method, 2));
@@ -187,7 +156,7 @@ class Dio
         }
         foreach($this->rules as $key => $rule) {
             if(array_key_exists($key, $this->found)) continue;
-            $this->found[$key] = $this->evaluateAndGet($key);
+            $this->evaluateAndGet($key);
         }
     }
     // +----------------------------------------------------------------------+
@@ -218,9 +187,8 @@ class Dio
      *
      * @param null|string $key
      * @return array|string|bool
-     * @deprecated
      */
-    public function evaluateAndGet($key = null)
+    private function evaluateAndGet($key = null)
     {
         if (is_null($key)) {
             return $this->found;
@@ -229,6 +197,7 @@ class Dio
             return $this->found[$key];
         }
         $valTO = $this->evaluate($key);
+        $this->setValue($key, $valTO->getValue());
 
         if ($valTO->fails()) {
             $value   = $valTO->getValue();
@@ -242,7 +211,6 @@ class Dio
 
             return false;
         }
-        $this->setValue($key, $valTO->getValue());
 
         return $valTO->getValue();
     }
@@ -273,13 +241,13 @@ class Dio
     }
 
     /**
-     * @param string $name
+     * @param string $key
      * @param mixed  $value
      * @return Dio
      */
-    public function setValue($name, $value)
+    public function setValue($key, $value)
     {
-        $this->found[$name] = $value;
+        $this->found[$key] = $value;
 
         return $this;
     }
@@ -327,29 +295,30 @@ class Dio
     }
 
     /**
-     * @param null|string $name
+     * @param null|string $key
      * @return array|mixed
      */
-    public function getMessages($name = null)
+    public function getMessages($key = null)
     {
-        if (!is_null($name)) {
-            return Utils\Helper::arrGet($this->messages, $name);
+        $this->evaluateAll();
+        if (!is_null($key)) {
+            return Utils\Helper::arrGet($this->messages, $key);
         }
 
         return $this->messages;
     }
 
     /**
-     * @param string     $name
+     * @param string     $key
      * @param mixed      $error
      * @param bool|mixed $value
      * @return Dio
      */
-    public function setError($name, $error, $value = false)
+    public function setError($key, $error, $value = false)
     {
-        $this->messages[$name] = $error;
+        $this->messages[$key] = $error;
         if ($value !== false) {
-            $this->setValue($name, $value);
+            $this->setValue($key, $value);
         }
         $this->err_num++;
 
@@ -370,23 +339,23 @@ class Dio
     }
 
     /**
-     * finds a value with $name in the source data.
+     * finds a value with $key in the source data.
      *
-     * @param string      $name
+     * @param string      $key
      * @param array|Rules $rules
      * @return string
      */
-    public function find($name, $rules = [])
+    public function find($key, $rules = [])
     {
         // find a value from data source.
         $value = null;
         if (Utils\Helper::arrGet($rules, 'multiple')) {
             // check for multiple case i.e. Y-m-d.
-            return Utils\Helper::prepare_multiple($name, $this->source, $rules['multiple']);
+            return Utils\Helper::prepare_multiple($key, $this->source, $rules['multiple']);
         }
-        if (array_key_exists($name, $this->source)) {
+        if (array_key_exists($key, $this->source)) {
             // simplest case.
-            $value = $this->source[$name];
+            $value = $this->source[$key];
         }
         if (is_array($value) && !Utils\Helper::arrGet($rules, 'array')) {
             return '';
