@@ -21,6 +21,18 @@ namespace WScore\Validation;
  * @method Rules asTime(string $key)
  * @method Rules asTimeHi(string $key)
  * @method Rules asTel(string $key)
+ * @method Rules isText()
+ * @method Rules isMail()
+ * @method Rules isBinary()
+ * @method Rules isNumber()
+ * @method Rules isInteger()
+ * @method Rules isFloat()
+ * @method Rules isDate()
+ * @method Rules isDatetime()
+ * @method Rules isDateYM()
+ * @method Rules isTime()
+ * @method Rules isTimeHi()
+ * @method Rules isTel()
  */
 class Dio
 {
@@ -89,8 +101,9 @@ class Dio
      * @param $name
      * @param $type
      * @return Rules
+     * @deprecated
      */
-    public function setRule($name, $type)
+    private function setRule($name, $type)
     {
         $this->rules[$name] = $this->ruler->withType($type);
         $this->isEvaluated = false;
@@ -115,13 +128,31 @@ class Dio
      * @param array|Rules $rules
      * @throws \InvalidArgumentException
      * @return mixed
+     * @deprecated
      */
     public function is($name, $rules)
     {
         $this->rules[$name] = $rules;
         $this->isEvaluated = false;
 
-        return $this->get($name);
+        return $this->evaluateAndGet($name);
+    }
+
+    /**
+     * sets rules for the $key.
+     *
+     * @param string      $key
+     * @param array|Rules $rules
+     * @return $this
+     */
+    public function set($key, $rules = null)
+    {
+        if ($rules) {
+            $this->rules[$key] = $rules;
+        }
+        $this->isEvaluated = false;
+
+        return $this;
     }
 
     /**
@@ -139,30 +170,57 @@ class Dio
 
             return $this->setRule($name, $type);
         }
+        if (substr($method, 0, 2) === 'is') {
+            $type = strtolower(substr($method, 2));
+            return $this->ruler->withType($type);
+        }
         throw new \BadMethodCallException;
     }
 
-    private function evaluate()
+    /**
+     * evaluate all the rules and saves the into $this->found.
+     */
+    private function evaluateAll()
     {
         if($this->isEvaluated) {
             return;
         }
         foreach($this->rules as $key => $rule) {
             if(array_key_exists($key, $this->found)) continue;
-            $this->found[$key] = $this->get($key);
+            $this->found[$key] = $this->evaluateAndGet($key);
         }
     }
     // +----------------------------------------------------------------------+
     //  getting found values
     // +----------------------------------------------------------------------+
     /**
+     * sets rules for the $key, and returns the evaluated value.
+     * returns false if invalidated.
+     *
+     * @param string      $key
+     * @param array|Rules $rules
+     * @return bool|mixed
+     */
+    public function get($key, $rules = null)
+    {
+        $this->set($key, $rules);
+        $valTO = $this->evaluate($key);
+        if ($valTO->fails()) {
+            return false;
+        }
+
+        return $valTO->getValue();
+    }
+
+    /**
      * returns found value.
      * this method returns values that maybe invalid.
      *
      * @param null|string $key
      * @return array|string|bool
+     * @deprecated
      */
-    public function get($key = null)
+    public function evaluateAndGet($key = null)
     {
         if (is_null($key)) {
             return $this->found;
@@ -170,26 +228,34 @@ class Dio
         if (array_key_exists($key, $this->found)) {
             return $this->found[$key];
         }
-        $rules = array_key_exists($key, $this->rules) ? $this->rules[$key] : $this->ruler->withType('text');
-        $rules = $this->setupRules($rules);
-        $found = $this->find($key, $rules);
-        $valTO = $this->verify->apply($found, $rules);
+        $valTO = $this->evaluate($key);
 
         if ($valTO->fails()) {
-            $found   = $valTO->getValue();
+            $value   = $valTO->getValue();
             $message = $valTO->message();
-            $this->isError($key, $message, $found);
-            if (is_array($found)) {
-                $this->_findClean($found, $message);
+            $this->setError($key, $message, $value);
+            if (is_array($value)) {
+                $this->_findClean($value, $message);
 
-                return $found;
+                return $value;
             }
 
             return false;
         }
-        $this->set($key, $valTO->getValue());
+        $this->setValue($key, $valTO->getValue());
 
         return $valTO->getValue();
+    }
+
+    /**
+     * returns all the evaluated values including invalidated one.
+     *
+     * @return array
+     */
+    public function getAll()
+    {
+        $this->evaluateAll();
+        return $this->found;
     }
 
     /**
@@ -199,6 +265,7 @@ class Dio
      */
     public function getSafe()
     {
+        $this->evaluateAll();
         $safeData = $this->found;
         $this->_findClean($safeData, $this->messages);
 
@@ -210,7 +277,7 @@ class Dio
      * @param mixed  $value
      * @return Dio
      */
-    public function set($name, $value)
+    public function setValue($name, $value)
     {
         $this->found[$name] = $value;
 
@@ -246,7 +313,7 @@ class Dio
      */
     public function fails()
     {
-        $this->evaluate();
+        $this->evaluateAll();
         return $this->err_num ? true : false;
     }
 
@@ -255,7 +322,7 @@ class Dio
      */
     public function passes()
     {
-        $this->evaluate();
+        $this->evaluateAll();
         return $this->err_num ? false : true;
     }
 
@@ -263,7 +330,7 @@ class Dio
      * @param null|string $name
      * @return array|mixed
      */
-    public function message($name = null)
+    public function getMessages($name = null)
     {
         if (!is_null($name)) {
             return Utils\Helper::arrGet($this->messages, $name);
@@ -278,11 +345,11 @@ class Dio
      * @param bool|mixed $value
      * @return Dio
      */
-    public function isError($name, $error, $value = false)
+    public function setError($name, $error, $value = false)
     {
         $this->messages[$name] = $error;
         if ($value !== false) {
-            $this->set($name, $value);
+            $this->setValue($name, $value);
         }
         $this->err_num++;
 
@@ -345,6 +412,19 @@ class Dio
         $rules = Utils\Helper::prepare_sameWith($this, $rules);
 
         return $rules;
+    }
+
+    /**
+     * @param $key
+     * @return Utils\ValueToInterface
+     */
+    private function evaluate($key)
+    {
+        $rules = array_key_exists($key, $this->rules) ? $this->rules[$key] : $this->ruler->withType('text');
+        $rules = $this->setupRules($rules);
+        $found = $this->find($key, $rules);
+        $valTO = $this->verify->apply($found, $rules);
+        return $valTO;
     }
     // +----------------------------------------------------------------------+
 }
