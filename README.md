@@ -21,12 +21,12 @@ Use composer. only dev-master is available...
 
 ```json
 "require": {
-    "wscore/validation": "^1.0"
+    "wscore/validation": "^2.0"
 }
 ```
 
 
-Simple Usage
+Basic Usage
 ------------
 
 ### factory object
@@ -39,42 +39,42 @@ use \WScore\Validation\ValidationFactory;
 
 $factory = new ValidationFactory();    // use English rules and messages.
 $factory = new ValidationFactory('ja'); // use Japanese rules and messages.
+
+$input = $factory->on($_POST); // create a validator object. 
 ```
+
+### validation
 
 to validate an array, 
 
 ```php
-$input = $factory->on($_POST);
-$input->asText('name')->required(); // set rule on 'name'.  
-$age = $input->asInteger('age')->range([10, 70]); // set rule on age and get the value. 
-if($input->fails()) {
-   $messages = $input->messages(); // get error messages
+$input->set('name', $input->isText()->required()); // set rule on 'name'.  
+$age = $input->get('age', $input->isInteger()->range([10, 70])); // set rule on age and get the value. 
+if ($input->fails()) {
+    $messages = $input->messages(); // get error messages
+    $badInputs = $input->getAll(); // get all the value including invalidated one. 
 }
-$values = $input->get(); // get all the value. 
+$goodInputs = $input->getSafe(); // get only the validated value. 
 ```
 
+* The two basic methods, `set` sets rules, and `get` sets the rule and returns a value. 
+* Check the validation result by `fails()` method (or `passes()` method).
+* The `getAll()` method retrieves all the validated as well as invalidated values.
+  To retrieve __only the validated values__, use ```getSafe()``` method.
 
-### validation types
 
-The `as{Type}($name)` method sets default rules for the input `$name`. Use method chains to add more rules. 
+### types
+
+Use `set` method with `is{Type}` rules, or use `as{Type}($name)` method 
+as a shorthand method to set validation rules for the input `$name`. 
 
 ```php
-$input = $factory->on($_POST);   // get validator.
-$input->asText('name')->required();
+$input->set('name', $input->isText()->required()); // proper code.
+$input->asText('name')->required();                // shorter code.
 $input->asMail('mail')->required()->confirm('mail2'));
-$found = $input->get(); // [ 'name' => some name... ]
-if( $input->fails() ) {
-    $onlyGoodData    = $input->getSafe();
-    $containsBadData = $input->get();
-} else {
-    $onlyGoodData    = $input->get();
-}
 ```
 
-Check the validation result by using `fails()` method (or `passes()` method).
-
-The `get()` method retrieves the validated as well as invalidated values.
-To retrieve __only the validated values__, use ```getSafe()``` method.
+The rule **types** are standard rules for the given validation type. 
 
 The predefined types are:
 
@@ -94,7 +94,14 @@ The predefined types are:
 
 which are defined in `Locale/{locale}/validation.types.php` file.
 
-### filter types
+### validation rules
+
+There are many rules for validations. You can chain them 
+as shown in previous example codes;
+
+```php
+$input->asMail('mail')->required()->string(Rules::STRING_LOWER)->confirm('mail2'));
+```
 
 Available filter (or rules) types. 
 
@@ -123,19 +130,6 @@ Available filter (or rules) types.
  * `in(array $choices)`:               checks for list of possible values. 
  * `confirm(string $key)`:             confirm against another $key. 
 
-### validating a single value
-
-##### rewrite-this-section.
-
-Use `verify` method to validate a single value.
-
-```php
-$name  = $input->verify( 'WScore', Rules::text()->string('lower') ); // returns 'wscore'
-if( false === $input->verify( 'Bad', Rules::int() ) { // returns false
-    echo $input->result()->message(); // echo 'not an integer';
-}
-```
-
 
 Advanced Features
 -----------------
@@ -148,7 +142,7 @@ Validating an array of data is easy. When the validation fails,
 ```php
 $input->source( array( 'list' => [ '1', '2', 'bad', '4' ] ) );
 $input->asInteger('list')->array();
-if( !$input->passes() ) {
+if( $input->fails() ) {
     $values = $validation->get('list');
     $goods  = $validation->getSafe();
     $errors = $validation->message();
@@ -173,6 +167,8 @@ echo $validation->is( 'bd', Rules::date() ); // 2001-09-25
 use ```multiple``` rules to construct own multiple inputs as,
 
 ```php
+// for inputs like,
+// [ 'ranges_y1' => '2001', 'ranges_m1' => '09', 'ranges_y2' => '2011', 'ranges_m2' => '11' ]
 $input->asText('ranges')->multiple( [
     'suffix' => 'y1,m1,y2,m2',
     'format' => '%04d/%02d - %04d/%02d'
@@ -183,7 +179,7 @@ where `suffix` lists the postfix for the inputs,
 and `format` is the format string using sprintf.
 
 
-### sameWith to compare values
+### confirm to compare values
 
 for password or email validation with two input fields 
 to compare each other. 
@@ -192,7 +188,7 @@ to compare each other.
 $input->source([ 'text1' => '123ABC', 'text2' => '123abc' ] );
 echo $validation->asText('text1')
 	->string('lower')
-	->sameWith('text2') ); // 123abc
+	->confirm('text2') ); // 123abc
 ```
 
 Please note that the actual input strings are different.
