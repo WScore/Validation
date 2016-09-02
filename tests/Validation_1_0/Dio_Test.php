@@ -119,6 +119,34 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['bad' => 'bad pattern'], $input->getMessages());
     }
 
+    /**
+     * @test
+     */
+    function get_returns_false_on_invalidated_value()
+    {
+        $source = ['bad' => 'b@d'];
+        $input = $this->factory->on($source);
+
+        $this->assertFalse($input->get('bad', $input->isText->required()->pattern('[a-z]+')));
+        $this->assertFalse($input->get('bad'));
+        $this->assertEquals('b@d', $input->getAll()['bad']);
+        $this->assertEquals([], $input->getSafe());
+    }
+
+    /**
+     * @test
+     */
+    function set_returns_false_on_invalidated_value()
+    {
+        $source = ['bad' => 'b@d'];
+        $input = $this->factory->on($source);
+
+        $input->set('bad', $input->isText->required()->pattern('[a-z]+'));
+        $this->assertFalse($input->get('bad'));
+        $this->assertEquals('b@d', $input->getAll()['bad']);
+        $this->assertEquals([], $input->getSafe());
+    }
+
     // +----------------------------------------------------------------------+
     //  test for array input
     // +----------------------------------------------------------------------+
@@ -206,7 +234,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = array( 'test_y'=>'2013', 'test_m'=>'11', 'test_d'=>'08', 'test_h'=>'15', 'test_i'=>'13', 'test_s'=>'59' );
         $this->validate->source($source );
-        $this->validate->asDateTime( 'test' );
+        $this->validate->asDatetime( 'test' );
         $got = $this->validate->get('test');
 
         $this->assertEquals( '2013-11-08 15:13:59', $got );
