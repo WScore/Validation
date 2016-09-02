@@ -52,6 +52,7 @@ class ValidationFactory
     {
         $this->locale = $locale ?: $this->locale;
         $this->dir    = $dir ?: $this->dir;
+        $this->dir    = rtrim($this->dir, '/') . '/';
 
         $this->factory();
     }

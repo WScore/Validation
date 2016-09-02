@@ -33,6 +33,23 @@ class Validation_Test extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    function reads_messages_from_set_locale_directory()
+    {
+        $factory = new ValidationFactory('test', __DIR__ . '/LocaleTest/');
+        $v = $factory->on([]);
+        $v->get('test', $factory->rules()->withType('text')->required() );
+        $this->assertEquals( 'TESTED: required item', $v->getMessages('test') );
+
+        
+        $factory = new ValidationFactory('test', __DIR__ . '/LocaleTest');
+        $v = $factory->on([]);
+        $v->get('test', $factory->rules()->withType('text')->required() );
+        $this->assertEquals( 'TESTED: required item', $v->getMessages('test') );
+    }
+
+    /**
+     * @test
+     */
     function filter_invalid_integer_input()
     {
         $factory = new ValidationFactory();
