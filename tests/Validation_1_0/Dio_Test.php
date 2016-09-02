@@ -57,6 +57,19 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
+    function get_returns_false_but_sets_invalidated_value()
+    {
+        $source = array('test' => 'bad');
+        $this->validate->source( $source);
+        $got = $this->validate->is( 'test', $this->validate->getRule('number')->required() );
+        
+        $this->assertFalse($got);
+        $this->assertTrue("bad" === $this->validate->get('test'));
+    }
+    
+    /**
+     * @test
+     */
     function is_validates_and_returns_the_value()
     {
         $source = array( 'test' => 'tested' );
