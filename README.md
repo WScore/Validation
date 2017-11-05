@@ -50,8 +50,9 @@ $input = $factory->on($_POST); // create a validator object.
 to validate an array, 
 
 ```php
-$input->set('name', $input->isText->required()); // set rule on 'name'.  
-$age = $input->get('age', $input->isInteger->range([10, 70])); // set rule on age and get the value. 
+$input->set('name')->asText()->required()); // set rule on 'name'.  
+$input->set('age')->asInteger()->range([10, 70]); // set rule on 'age'.  
+$age = $input->get('age'); 
 if ($input->fails()) {
     $messages = $input->messages(); // get error messages
     $badInputs = $input->getAll(); // get all the value including invalidated one. 
@@ -59,7 +60,8 @@ if ($input->fails()) {
 $goodInputs = $input->getSafe(); // get only the validated value. 
 ```
 
-* The two basic methods, `set` sets rules, and `get` sets the rule and returns a value. 
+* The two basic methods: `set` sets rules, and `get` returns 
+  a validated value (i.e. returns false if validation fails). 
 * Check the validation result by `fails()` method (or `passes()` method).
 * The `getAll()` method retrieves all the validated as well as invalidated values.
   To retrieve __only the validated values__, use ```getSafe()``` method.
@@ -67,16 +69,14 @@ $goodInputs = $input->getSafe(); // get only the validated value.
 
 ### types
 
-Use `set` method with `is{Type}` property, or use `as{Type}($name)` method 
-as a shorthand method to set validation rules for the input `$name`. 
+The rule **types** are standard rules for the given validation type. 
+Select validation type by `is{Type}()` after `set` method, 
 
 ```php
-$input->set('name', $input->isText->required()); // proper code.
-$input->asText('name')->required();                // shorter code.
-$input->asMail('mail')->required()->confirm('mail2'));
+$input->set('name')->asText()->required(); // proper code.
 ```
 
-The rule **types** are standard rules for the given validation type. 
+where as the `Text` is the type.  
 
 The predefined types are:
 
@@ -102,7 +102,7 @@ There are many rules for validations. You can chain them
 as shown in previous example codes;
 
 ```php
-$input->asMail('mail')->required()->string(Rules::STRING_LOWER)->confirm('mail2'));
+$input->set('mail')->asMail()->required()->string(Rules::STRING_LOWER)->confirm('mail2'));
 ```
 
 Available filter (or rules) types. 
@@ -143,7 +143,7 @@ Validating an array of data is easy. When the validation fails,
 
 ```php
 $input->source( array( 'list' => [ '1', '2', 'bad', '4' ] ) );
-$input->asInteger('list')->array();
+$input->set('list')->asInteger()->array();
 if( $input->fails() ) {
     $values = $validation->get('list');
     $goods  = $validation->getSafe();
@@ -163,7 +163,7 @@ to treat separate input fields as one input, such as date.
 
 ```php
 $input->source( [ 'bd_y' => '2001', 'bd_m' => '09', 'bd_d' => '25' ] );
-echo $validation->is( 'bd', Rules::date() ); // 2001-09-25
+echo $validation->set('bd')->asDate(); // 2001-09-25
 ```
 
 use ```multiple``` rules to construct own multiple inputs as,
@@ -171,7 +171,7 @@ use ```multiple``` rules to construct own multiple inputs as,
 ```php
 // for inputs like,
 // [ 'ranges_y1' => '2001', 'ranges_m1' => '09', 'ranges_y2' => '2011', 'ranges_m2' => '11' ]
-$input->asText('ranges')->multiple( [
+$input->set('ranges')->asText()->multiple( [
     'suffix' => 'y1,m1,y2,m2',
     'format' => '%04d/%02d - %04d/%02d'
 ] );
@@ -188,7 +188,8 @@ to compare each other.
 
 ```php
 $input->source([ 'text1' => '123ABC', 'text2' => '123abc' ] );
-echo $validation->asText('text1')
+echo $validation->set('text1')
+    ->asText()
 	->string('lower')
 	->confirm('text2') ); // 123abc
 ```
@@ -202,7 +203,7 @@ They become identical after lowering the strings.
 some filter must be applied in certain order... 
 
 ```php
-echo $input->get( 'ABC', $input->isText->pattern('[a-c]*')->string('lower'); // 'abc'
+echo $input->set('ABC')->asText()->pattern('[a-c]*')->string('lower'); // 'abc'
 # must lower the string first, then check for pattern...
 ```
 
@@ -265,7 +266,7 @@ Error message is determined as follows:
 for tailored message, use `message` method to set its message.
 
 ```php
-$input->set('text', $input->isText->required()->message('Oops!'));
+$input->set('text')->asText()->required()->message('Oops!'));
 echo $input->getMessage('text'); // 'Oops!'
 ```
 

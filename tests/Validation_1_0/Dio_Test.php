@@ -41,47 +41,16 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $source = ['test' => 'tested', 'more' => 'tested', 'extra' => 'tested'];
         $input  = $this->factory->on($source);
         $this->assertEquals('tested', $input->get('test'));
-        $this->assertEquals('tested', $input->get('more', $input->isText));
-        $this->assertEquals('tested', $input->get('extra', $input->getRule('text')));
-        $this->assertEquals('', $input->get('none', $input->getRule('text')));
-        $this->assertEquals(['more' => 'tested', 'extra' => 'tested', 'none' => ''], $input->getAll());
+        $input->set('more')->asText();
+        $input->set('extra')->asText();
+        $this->assertEquals('tested', $input->get('more'));
+        $this->assertEquals('tested', $input->get('extra'));
+        $this->assertEquals('', $input->get('none'));
+        $this->assertEquals(['more' => 'tested', 'extra' => 'tested'], $input->getAll());
         $this->assertFalse($input->fails());
         $this->assertTrue($input->passes());
     }
-
-    /**
-     * @test
-     */
-    function sets_rule_and_returns_evaluated_values()
-    {
-        $source = ['test' => 'tested', 'more' => 'tested', 'extra' => 'tested'];
-        $input  = $this->factory->on($source);
-        $input->set('test')
-            ->set('more', $input->isText)
-            ->set('extra', $input->getRule('text'))
-            ->set('none', $input->isText);
-        $this->assertEquals(['more' => 'tested', 'extra' => 'tested', 'none' => ''], $input->getAll());
-        $this->assertFalse($input->fails());
-        $this->assertTrue($input->passes());
-    }
-
-    /**
-     * @test
-     */
-    function asType_sets_rule()
-    {
-        $source = array( 'test' => 'tested', 'more' => 'done' );
-        $input  = $this->factory->on($source);
-        $input->asText('test');
-        $input->asText('more');
-        $input->asText('none');
-        $this->assertFalse($input->fails());
-        $this->assertTrue($input->passes());
-
-        $source['none'] = '';
-        $this->assertEquals($source,  $input->getAll());
-    }
-
+    
     /**
      * @test
      */
@@ -89,8 +58,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = ['test' => 'tested'];
         $input = $this->factory->on($source);
-        $input->set('test', $input->isText->required())
-            ->set('none', $input->isText->required());
+        $input->set('test')->asText()->required();
+        $input->set('none')->asText()->required();
 
         $this->assertTrue($input->fails());
         $this->assertFalse($input->passes());
@@ -108,8 +77,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = ['test' => 'tested', 'bad' => 'b@d'];
         $input = $this->factory->on($source);
-        $input->set('test', $input->isText->required())
-              ->set('bad',  $input->isText->required()->pattern('[a-z]+')->message('bad pattern'));
+        $input->set('test')->asText()->required();
+        $input->set('bad')->asText()->required()->pattern('[a-z]+')->message('bad pattern');
 
         $this->assertTrue($input->fails());
         $this->assertFalse($input->passes());
@@ -127,7 +96,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $source = ['bad' => 'b@d'];
         $input = $this->factory->on($source);
 
-        $this->assertFalse($input->get('bad', $input->isText->required()->pattern('[a-z]+')));
+        $input->set('bad')->asText()->required()->pattern('[a-z]+');
         $this->assertFalse($input->get('bad'));
         $this->assertEquals('b@d', $input->getAll()['bad']);
         $this->assertEquals([], $input->getSafe());
@@ -141,7 +110,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $source = ['bad' => 'b@d'];
         $input = $this->factory->on($source);
 
-        $input->set('bad', $input->isText->required()->pattern('[a-z]+'));
+        $input->set('bad')->asText()->required()->pattern('[a-z]+');
         $this->assertFalse($input->get('bad'));
         $this->assertEquals('b@d', $input->getAll()['bad']);
         $this->assertEquals([], $input->getSafe());
@@ -158,7 +127,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $test = array( 'tested', 'more test' );
         $source = array( 'test' => $test );
         $input = $this->factory->on($source );
-        $got = $input->get('test', $input->isText->array());
+        $input->set('test')->asText()->array();
+        $got = $input->get('test');
 
         $this->assertEquals( $test, $got );
         $this->assertEquals( $test, $input->get('test') );
@@ -175,7 +145,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $test = array( 'tested', 'more test' );
         $source = array( 'test' => $test );
         $input = $this->factory->on($source );
-        $got = $input->get('test', $input->isText);
+        $input->set('test')->asText();
+        $got = $input->get('test');
 
         $this->assertEquals( '', $got );
         $this->assertEquals( '', $input->get('test') );
@@ -194,7 +165,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $collect = array( 'test' => array( 0=>'123', 2=>'456') );
         $input = $this->factory->on($source );
 
-        $input->set('test', $input->isNumber->array());
+        $input->set('test')->asNumber()->array();
 
         // should return the input
         $this->assertEquals( false, $input->get('test') );
@@ -217,7 +188,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = array( 'test_y'=>'2013', 'test_m'=>'11', 'test_d'=>'08' );
         $this->validate->source($source );
-        $this->validate->asDate( 'test' );
+        $this->validate->set( 'test' )->asDate();
         $got = $this->validate->get('test');
 
         $this->assertEquals( '2013-11-08', $got );
@@ -234,7 +205,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $source = array( 'test_y'=>'2013', 'test_m'=>'11', 'test_d'=>'08', 'test_h'=>'15', 'test_i'=>'13', 'test_s'=>'59' );
         $this->validate->source($source );
-        $this->validate->asDatetime( 'test' );
+        $this->validate->set( 'test' )->asDatetime();
         $got = $this->validate->get('test');
 
         $this->assertEquals( '2013-11-08 15:13:59', $got );
@@ -257,7 +228,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         );
         $mail = 'email@example.com';
         $this->validate->source($source );
-        $this->validate->asMail( 'mail1' );
+        $this->validate->set( 'mail1' )->asMail();
         $got = $this->validate->get('mail1');
 
         $this->assertEquals( 'email@example.com', $got );
@@ -278,7 +249,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         );
         $mail = 'email@example.com';
         $this->validate->source($source );
-        $this->validate->asMail( 'mail1' )->sameWith( 'mail2');
+        $this->validate->set( 'mail1' )->asMail()->sameWith( 'mail2');
         $got = $this->validate->get('mail1');
 
         $this->assertEquals( 'email@example.com', $got );
@@ -298,7 +269,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         );
         $mail = 'email@example.com';
         $this->validate->source($source );
-        $this->validate->asMail( 'mail1' )->confirm( 'mail2');
+        $this->validate->set( 'mail1' )->asMail()->confirm( 'mail2');
         $got = $this->validate->get('mail1');
 
         $this->assertEquals( false, $got );
@@ -319,7 +290,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         );
         $mail = 'email@example.com';
         $this->validate->source($source );
-        $this->validate->asMail( 'mail1' )->confirm( 'mail2');
+        $this->validate->set( 'mail1' )->asMail()->confirm( 'mail2');
         $got = $this->validate->get('mail1');
 
         $this->assertEquals( false, $got );
@@ -339,7 +310,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'mail2' => 'Email2@Example.com',
         );
         $this->validate->source($source );
-        $this->validate->asMail( 'mail1' )->sameWith( 'mail2');
+        $this->validate->set( 'mail1' )->asMail()->sameWith( 'mail2');
         $got = $this->validate->get('mail1');
 
         $this->assertEquals( '', $got );
@@ -359,7 +330,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'mail2' => 'Email2@Example.com',
         );
         $this->validate->source($source );
-        $this->validate->asMail( 'mail1' )->sameWith( 'mail2')->required();
+        $this->validate->set( 'mail1' )->asMail()->sameWith( 'mail2')->required();
         $got = $this->validate->get('mail1');
 
         $this->assertEquals( '', $got );
@@ -376,7 +347,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     {
         $input = [ 'a_y1'=>'2014', 'a_m1'=>'05', 'a_d1'=>'01', 'a_y2'=>'2014', 'a_m2'=>'07' ];
         $this->validate->source($input);
-        $this->validate->asText( 'a' )->multiple( [
+        $this->validate->set( 'a' )->asText()->multiple( [
             'suffix' => 'y1,m1,y2,m2',
             'format' => '%04d/%02d - %04d/%02d'
         ] )->required();
@@ -394,8 +365,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'done' => '',
         ];
         $this->validate->source($input);
-        $this->validate->asText('flag');
-        $this->validate->asText('done')->requiredIf('flag');
+        $this->validate->set('flag')->asText();
+        $this->validate->set('done')->asText()->requiredIf('flag');
         $this->assertEquals( true, $this->validate->fails() );
         $this->assertEquals( 'required item', $this->validate->getMessages('done') );
     }
@@ -410,8 +381,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'done' => '',
         ];
         $this->validate->source($input);
-        $this->validate->asText('flag');
-        $this->validate->asText('done')->requiredIf('flag', ['a']);
+        $this->validate->set('flag')->asText();
+        $this->validate->set('done')->asText()->requiredIf('flag', ['a']);
         $this->assertEquals( true, $this->validate->fails() );
         $this->assertEquals( 'required item', $this->validate->getMessages('done') );
     }
@@ -426,8 +397,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'done' => '',
         ];
         $this->validate->source($input);
-        $this->validate->asText('flag');
-        $this->validate->asText('done')->requiredIf('flag', ['b']);
+        $this->validate->set('flag')->asText();
+        $this->validate->set('done')->asText()->requiredIf('flag', ['b']);
         $this->assertEquals( true, $this->validate->passes() );
     }
 
@@ -441,8 +412,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'done' => '',
         ];
         $this->validate->source($input);
-        $this->validate->asText('flag');
-        $this->validate->asText('done')->requiredIf('flag', ['a']);
+        $this->validate->set('flag')->asText();
+        $this->validate->set('done')->asText()->requiredIf('flag', ['a']);
         $this->assertEquals( true, $this->validate->passes() );
 
         $input = [
@@ -450,8 +421,8 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
             'done' => '',
         ];
         $validation = $this->factory->on($input);
-        $validation->asText('flag')->string('lower');
-        $validation->asText('done')->requiredIf('flag', ['a']);
+        $validation->set('flag')->asText()->string('lower');
+        $validation->set('done')->asText()->requiredIf('flag', ['a']);
         $this->assertEquals( true, $validation->fails() );
         $this->assertEquals( 'required item', $validation->getMessages('done') );
     }

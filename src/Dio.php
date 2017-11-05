@@ -8,31 +8,6 @@ namespace WScore\Validation;
  *
  * Data Import Object
  * for validating a a data, an array of values (i.e. input from html form).
- *
- * @method Rules asText(string $key)
- * @method Rules asMail(string $key)
- * @method Rules asBinary(string $key)
- * @method Rules asNumber(string $key)
- * @method Rules asInteger(string $key)
- * @method Rules asFloat(string $key)
- * @method Rules asDate(string $key)
- * @method Rules asDatetime(string $key)
- * @method Rules asDateYM(string $key)
- * @method Rules asTime(string $key)
- * @method Rules asTimeHi(string $key)
- * @method Rules asTel(string $key)
- * @property Rules isText
- * @property Rules isMail
- * @property Rules isBinary
- * @property Rules isNumber
- * @property Rules isInteger
- * @property Rules isFloat
- * @property Rules isDate
- * @property Rules isDatetime
- * @property Rules isDateYM
- * @property Rules isTime
- * @property Rules isTimeHi
- * @property Rules isTel
  */
 class Dio
 {
@@ -107,58 +82,20 @@ class Dio
     }
 
     /**
-     * sets rules for the $key.
-     *
-     * @param string      $key
-     * @param array|Rules $rules
-     * @return $this
+     * @param string $key
+     * @return RuleType
      */
-    public function set($key, $rules = null)
+    public function set($key)
     {
-        if ($rules) {
-            $this->rules[$key] = $rules;
-        }
         $this->isEvaluated = false;
+        unset($this->found[$key]);
 
-        return $this;
+        $rules = clone $this->ruler;
+        $this->rules[$key] = $rules;
+        
+        return new RuleType($rules);
     }
-
-    /**
-     * for as{Type} methods.
-     *
-     * @param string $method
-     * @param array  $args
-     * @return Rules
-     */
-    public function __call($method, $args)
-    {
-        if (substr($method, 0, 2) === 'as') {
-            $type = strtolower(substr($method, 2));
-            $key  = $args[0];
-            $rule = $this->ruler->withType($type);
-            $this->set($key, $rule);
-            return $rule;
-        }
-        if (substr($method, 0, 2) === 'is') {
-            $type = strtolower(substr($method, 2));
-            return $this->ruler->withType($type);
-        }
-        throw new \BadMethodCallException;
-    }
-
-    /**
-     * @param string $name
-     * @return Rules
-     */
-    public function __get($name)
-    {
-        if (substr($name, 0, 2) === 'is') {
-            $type = strtolower(substr($name, 2));
-            return $this->ruler->withType($type);
-        }
-        throw new \BadMethodCallException;
-    }
-
+    
     /**
      * evaluate all the rules and saves the into $this->found.
      */
@@ -180,12 +117,10 @@ class Dio
      * returns false if invalidated.
      *
      * @param string      $key
-     * @param array|Rules $rules
      * @return bool|mixed
      */
-    public function get($key, $rules = null)
+    public function get($key)
     {
-        $this->set($key, $rules);
         $valTO = $this->evaluate($key);
         if ($valTO->fails()) {
             return false;
