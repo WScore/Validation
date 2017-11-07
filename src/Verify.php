@@ -76,7 +76,7 @@ class Verify
         $errors = array();
         $failed = false;
         foreach ($value as $key => $val) {
-            $valTO        = $this->applyFilters($val, $rules);
+            $valTO        = $this->apply($val, $rules);
             $result[$key] = $valTO->getValue();
             if ($valTO->fails()) {
                 $failed       = true;
@@ -105,10 +105,10 @@ class Verify
         $valueTO = $this->valueTO->forge($value);
         // loop through all the rules to validate $value.
         foreach ($rules as $rule => $parameter) {
-            // some filters are not to be applied...
+            // skip rules with option as FALSE.
             if ($parameter === false) {
                 continue;
-            } // skip rules with option as FALSE.
+            }
             // apply filter.
             $method = 'filter_' . $rule;
             if (method_exists($this->filter, $method)) {

@@ -304,7 +304,7 @@ class Dio
         $value = null;
         if (Utils\Helper::arrGet($rules, 'multiple')) {
             // check for multiple case i.e. Y-m-d.
-            return Utils\Helper::prepare_multiple($key, $this->source, $rules['multiple']);
+            return Utils\HelperMultiple::prepare_multiple($key, $this->source, $rules['multiple']);
         }
         if (array_key_exists($key, $this->source)) {
             // simplest case.
