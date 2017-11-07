@@ -128,4 +128,15 @@ class Rules_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals( $rule0, $rule1 );
         $this->assertNotSame( $rule0, $rule1 );
     }
+
+    /**
+     * @test
+     */
+    function simplified_rules()
+    {
+        $rules = $this->factory->rules()->withType('text');
+        $this->assertFalse($rules['string']);
+        $rules->strToUpper();
+        $this->assertEquals(Rules::STRING_UPPER, $rules['string']);
+    }
 }

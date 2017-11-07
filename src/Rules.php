@@ -42,6 +42,30 @@ use Traversable;
  * @method Rules sameAs(string $value)            compare against $value.
  * @method Rules sameEmpty(bool $check = true)
  *
+ * for simplified rules
+ * 
+ * @method Rules strToLower()
+ * @method Rules strToUpper()
+ * @method Rules strToCapital()
+ * @method Rules mbToHankaku()
+ * @method Rules mbToZenkaku()
+ * @method Rules mbToHankakuKatakana()
+ * @method Rules mbToHiragana()
+ * @method Rules mbToKatakana()
+ * @method Rules mbOnlyKatakana()
+ * @method Rules mbOnlyHiragana()
+ * @method Rules mbOnlyHankaku()
+ * @method Rules mbOnlyHankakuKatakana()
+ * @method Rules sanitizeMail()
+ * @method Rules sanitizeFloat()
+ * @method Rules sanitizeInt()
+ * @method Rules sanitizeUrl()
+ * @method Rules sanitizeString()
+ * @method Rules matchNumber()
+ * @method Rules matchInteger()
+ * @method Rules matchFloat()
+ * @method Rules matchCode()
+ * @method Rules matchMail()
  */
 class Rules implements \ArrayAccess, \IteratorAggregate
 {
@@ -180,6 +204,30 @@ class Rules implements \ArrayAccess, \IteratorAggregate
         'err_msg' => 'message',
     ];
     
+    private $simples = [
+        'strToLower' => ['string', self::STRING_LOWER],
+        'strToUpper' => ['string', self::STRING_UPPER],
+        'strToCapital' => ['string', self::STRING_CAPITAL],
+        
+        'mbToHankaku' => ['mbConvert', self::MB_HANKAKU],
+        'mbToZenkaku' => ['mbConvert', self::MB_ZENKAKU],
+        'mbToHankakuKatakana' => ['mbConvert', self::MB_HAN_KANA],
+        'mbToHiragana' => ['mbConvert', self::MB_HIRAGANA],
+        'mbToKatakana' => ['mbConvert', self::MB_KATAKANA],
+        
+        'sanitizeMail' => ['sanitize', 'mail'],
+        'sanitizeFloat' => ['sanitize', 'float'],
+        'sanitizeInt' => ['sanitize', 'int'],
+        'sanitizeUrl' => ['sanitize', 'url'],
+        'sanitizeString' => ['sanitize', 'string'],
+        
+        'matchNumber' => ['match', 'number'],
+        'matchInteger' => ['match', 'int'],
+        'matchFloat' => ['match', 'float'],
+        'matchCode' => ['match', 'code'],
+        'matchMail' => ['match', 'mail'],
+    ];
+    
     /**
      * @param $rule
      * @param $args
@@ -187,6 +235,10 @@ class Rules implements \ArrayAccess, \IteratorAggregate
      */
     public function __call($rule, $args)
     {
+        if (isset($this->simples[$rule])) {
+            $args = [$this->simples[$rule][1]];
+            $rule = $this->simples[$rule][0];
+        }
         if(empty($args)) {
             $value = true;
         } elseif(count($args) === 1) {
