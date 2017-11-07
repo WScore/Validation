@@ -7,9 +7,9 @@ use WScore\Validation\Rules;
 class Helper
 {
     /**
-     * @param array      $arr
-     * @param string     $key
-     * @param null|mixed $default
+     * @param array|Rules $arr
+     * @param string      $key
+     * @param null|mixed  $default
      * @return mixed
      */
     public static function arrGet($arr, $key, $default = null)
@@ -65,18 +65,7 @@ class Helper
         if (!self::arrGet($rules, 'sameWith')) {
             return $rules;
         }
-        // find the same with value.
-        $sub_name = $rules['sameWith'];
-        if (is_object($rules)) {
-            $sub_filter = clone $rules;
-        } else {
-            $sub_filter = $rules;
-        }
-        $sub_filter['sameWith'] = false;
-        $sub_filter['required'] = false;
-        $value                  = $dio->find($sub_name, $sub_filter);
-        $value                  = $dio->verify->is($value, $sub_filter);
-
+        $value = self::get_sameWith_value($dio, $rules);
         // reset sameWith filter, and set same{As|Empty} filter.
         $rules['sameWith'] = false;
         if ($value) {
@@ -98,23 +87,57 @@ class Helper
         if (!self::arrGet($rules, 'requiredIf')) {
             return $rules;
         }
-        $args = $rules['requiredIf'];
-        if (!is_array($args)) {
-            $flag_name = $args;
-            $flags_in  = null;
-        } else {
-            $flag_name = $args[0];
-            $flags_in  = array_key_exists(1, $args) ? (array)$args[1] : null;
-        }
+        list($flag_name, $flags_in) = self::get_flags($rules);
         $flag_value = $dio->get($flag_name);
         if ((string)$flag_value === '') {
             return $rules;
         }
-        if ($flags_in && !in_array($flag_value, $flags_in)) {
+        if (!empty($flags_in) && !in_array($flag_value, $flags_in)) {
             return $rules;
         }
         $rules['required'] = true;
 
         return $rules;
+    }
+
+    /**
+     * @param array|Rules $rules
+     * @return array
+     */
+    private static function get_flags($rules)
+    {
+        $args = $rules['requiredIf'];
+        if (!is_array($args)) {
+            $flag_name = $args;
+            $flags_in  = [];
+        } else {
+            $flag_name = $args[0];
+            $flags_in  = array_key_exists(1, $args) ? (array)$args[1] : [];
+        }
+
+        return array($flag_name, $flags_in);
+    }
+
+    /**
+     * find the same with value.
+     * 
+     * @param Dio         $dio
+     * @param array|Rules $rules
+     * @return mixed
+     */
+    private static function get_sameWith_value($dio, $rules)
+    {
+        $sub_name = $rules['sameWith'];
+        if ($rules instanceof Rules) {
+            $sub_filter = clone $rules;
+        } else {
+            $sub_filter = $rules;
+        }
+        $sub_filter['sameWith'] = false;
+        $sub_filter['required'] = false;
+        $value                  = $dio->find($sub_name, $sub_filter);
+        $value                  = $dio->verify->is($value, $sub_filter);
+
+        return $value;
     }
 }

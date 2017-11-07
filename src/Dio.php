@@ -135,37 +135,21 @@ class Dio
     }
 
     /**
-     * returns found value.
-     * this method returns values that maybe invalid.
+     * evaluate for $key and stores results in $this->found and $this->messages. 
      *
-     * @param null|string $key
-     * @return array|string|bool
+     * @param string $key
      */
-    private function evaluateAndGet($key = null)
+    private function evaluateAndGet($key)
     {
-        if (is_null($key)) {
-            return $this->found;
-        }
-        if (array_key_exists($key, $this->found)) {
-            return $this->found[$key];
-        }
         $valTO = $this->evaluate($key);
-        $this->setValue($key, $valTO->getValue());
+        $value   = $valTO->getValue();
 
         if ($valTO->fails()) {
-            $value   = $valTO->getValue();
             $message = $valTO->message();
             $this->setError($key, $message, $value);
-            if (is_array($value)) {
-                $this->_findClean($value, $message);
-
-                return $value;
-            }
-
-            return false;
+        } else {
+            $this->setValue($key, $value);
         }
-
-        return $valTO->getValue();
     }
 
     /**
@@ -206,14 +190,15 @@ class Dio
     }
 
     /**
-     * @param array        $data
-     * @param array|string $error
+     * @param array $data
+     * @param array $error
      */
     protected function _findClean(&$data, $error)
     {
         if (empty($error)) {
+            // no error at all.
             return;
-        } // no error at all.
+        }
         foreach ($data as $key => $val) {
             if (!array_key_exists($key, $error)) {
                 continue; // no error.

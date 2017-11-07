@@ -109,13 +109,8 @@ class Verify
             if ($parameter === false) {
                 continue;
             }
-            // apply filter.
-            $method = 'filter_' . $rule;
-            if (method_exists($this->filter, $method)) {
-                $this->filter->$method($valueTO, $parameter);
-            } elseif (is_object($parameter) && is_callable($parameter)) {
-                $this->filter->applyClosure($valueTO, $parameter);
-            }
+            $this->applyFilterMethod($rule, $valueTO, $parameter);
+
             // loop break.
             if ($valueTO->getBreak()) {
                 break;
@@ -123,6 +118,21 @@ class Verify
         }
 
         return $valueTO;
+    }
+
+    /**
+     * @param $rule
+     * @param $valueTO
+     * @param $parameter
+     */
+    private function applyFilterMethod($rule, $valueTO, $parameter)
+    {
+        $method = 'filter_' . $rule;
+        if (method_exists($this->filter, $method)) {
+            $this->filter->$method($valueTO, $parameter);
+        } elseif (is_object($parameter) && is_callable($parameter)) {
+            $this->filter->applyClosure($valueTO, $parameter);
+        }
     }
     // +----------------------------------------------------------------------+
 }

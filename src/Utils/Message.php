@@ -10,10 +10,10 @@ class Message
 
     // +----------------------------------------------------------------------+
     /**
-     * @param null|string $locale
-     * @param null|string $dir
+     * @param string $locale
+     * @param string $dir
      */
-    public function __construct($locale = null, $dir = null)
+    public function __construct($locale = '', $dir = '')
     {
         if (!$locale) {
             $locale = 'en';
