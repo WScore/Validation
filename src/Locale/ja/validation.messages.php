@@ -2,21 +2,9 @@
 namespace WScore\Validation\Locale;
 
 return array(
+    // 5. general error message 
     0           => '入力内容を確認して下さい',
-    'encoding'  => '不正な文字コードです',
-    'required'  => '必須項目です',
-    'in'        => '選択できない値です',
-    'sameAs'    => '入力内容が一致しません',
-    'sameEmpty' => '確認用の項目を入力ください',
-    'max'       => '最大値を超えています。',
-    'min'       => '最小値より小さい値です。',
-    'matches'   => [
-        'number' => '数値のみです(0-9)',
-        'int'    => '整数を入力してください',
-        'float'  => '数値を入力してください',
-        'code'   => '記号（半角英数字）です',
-        'mail'   => 'メールアドレスを入力してください',
-    ],
+    // 4. messages for types
     '_type_' => [
         'mail'     => 'メールアドレスが間違ってます',
         'number'   => '半角の数値です',
@@ -28,5 +16,21 @@ return array(
         'time'     => '正しい時間を入力してください',
         'timeHI'   => '正しい時分を入力してください',
         'tel'      => '正しい電話番号を入力してください',
-    ]
+    ],
+    // 3. specific messages for method
+    'encoding'  => '不正な文字コードです',
+    'required'  => '必須項目です',
+    'in'        => '選択できない値です',
+    'sameAs'    => '入力内容が一致しません',
+    'sameEmpty' => '確認用の項目を入力ください',
+    'max'       => '最大値を超えています。',
+    'min'       => '最小値より小さい値です。',
+    // 2. message for matches and parameter
+    'matches'   => [
+        'number' => '数値のみです(0-9)',
+        'int'    => '整数を入力してください',
+        'float'  => '数値を入力してください',
+        'code'   => '記号（半角英数字）です',
+        'mail'   => 'メールアドレスを入力してください',
+    ],
 );

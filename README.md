@@ -1,8 +1,7 @@
 Validation
 ==========
 
-A validation component, optimized multi-byte (i.e. Japanese language) support.
-
+A validation component, designed for multi-byte (i.e. Japanese language) support.
 Features includes, such as:
 
 *   works well with code completion.
@@ -21,10 +20,8 @@ PSR-1, PSR-2, and PSR-4.
 
 ### Installation
 
-```json
-"require": {
-    "wscore/validation": "^2.0"
-}
+```sh
+composer require "wscore/validation": "^2.0"
 ```
 
 
@@ -47,36 +44,48 @@ $input = $factory->on($_POST); // create a validator object.
 
 ### validation
 
-to validate an array, 
+a sample code for validating an array, 
 
 ```php
-$input->set('name')->asText()->required()); // set rule on 'name'.  
-$input->set('age')->asInteger()->range([10, 70]); // set rule on 'age'.  
+// set rules for input data. 
+$input->set('name')->asText()->required());  // a text
+$input->set('type')->asText()->in('old', 'young', 'teenager'); // a selected text
+$input->set('age')->asInteger()->range([10, 70]);  // an integer between 10-70
+
+// maybe update rules based on age?
 $age = $input->get('age'); 
-if ($input->fails()) {
-    $messages = $input->messages(); // get error messages
-    $badInputs = $input->getAll(); // get all the value including invalidated one. 
+if ($age > 12) {
+    $input->getRules('type')->required();
+} else {
+    $input->setValue('type', 'teenager');
 }
-$goodInputs = $input->getSafe(); // get only the validated value. 
+// result of validation. 
+if ($input->fails()) {
+    $messages   = $input->messages(); // get error messages
+    $badInputs  = $input->getAll(); // get all the value including invalidated one. 
+    $safeInputs = $input->getSafe(); // get only the validated value. 
+} else {
+    $validatedInputs  = $input->getAll(); // validation success! 
+}
 ```
 
-* The two basic methods: `set` sets rules, and `get` returns 
-  a validated value (i.e. returns false if validation fails). 
-* Check the validation result by `fails()` method (or `passes()` method).
-* The `getAll()` method retrieves all the validated as well as invalidated values.
-  To retrieve __only the validated values__, use ```getSafe()``` method.
-
+* `set($key)` sets validation rules for `$key`.
+* `get($key)` returns a validated value, or false if validation fails.
+* `getRules($key)` returns an existing rules object to modify.
+* `fails()` or `passes()` method will evaluate all rules and 
+   returns boolean if all validation rules has passed or not.
+* `getAll()` returns all the value including the invalidated ones, 
+   whereas `getSafe()` returns __only the validated values__.
+* `getMessages()` returns all the invalidated error messages. 
 
 ### types
 
 The rule **types** are standard rules for the given validation type. 
-Select validation type by `is{Type}()` after `set` method, 
+Select validation type by `as{Type}()` after `set` method, 
 
 ```php
-$input->set('name')->asText()->required(); // proper code.
+$input->set('key')->as{Type}()->{validationRule}();
 ```
-
-where as the `Text` is the type.  
 
 The predefined types are:
 
@@ -136,10 +145,10 @@ Available filter (or rules) types.
 Advanced Features
 -----------------
 
-### validating array as input
+### validating a list of input
 
-Validating an array of data is easy. When the validation fails,
- it returns the error message as array.
+To validate a list of input data, such as checkbox, use `array()` rules as follows. 
+When the validation fails, it returns the error message as array.
 
 ```php
 $input->source( array( 'list' => [ '1', '2', 'bad', '4' ] ) );
@@ -159,7 +168,8 @@ if( $input->fails() ) {
 
 ### multiple inputs
 
-to treat separate input fields as one input, such as date. 
+`WScore/Validation` can handle separate input fields, such as date, as one input. 
+For instance, `date`, `dateYM`, `datetime` types 
 
 ```php
 $input->source( [ 'bd_y' => '2001', 'bd_m' => '09', 'bd_d' => '25' ] );
@@ -250,57 +260,88 @@ if ($input->fails()) {
 Setting error will make `fails()` method to return `true`. 
 
 
-Predefined Messages
--------------------
+Modifying Error Messages
+------------------
 
-Error message is determined as follows:
+To use your own messages, create a file at `your/path/<locale>/validation.messages.php`, 
+then construct the validation as;
 
-1.   message to specify by message rule,
+```php
+$factory = new ValidationFactory('locale', 'your/path');
+$input = $factory->on($_POST);
+``` 
+
+The `validation.messages.php` should return an array looks like: 
+
+```php
+return array(
+    // 5. general error message 
+    0           => 'invalid input',
+    // 4. messages for types
+    '_type_'    => [
+        'mail'     => 'invalid mail format',
+        ...
+    ],
+    // 3. specific messages for method
+    'encoding'  => 'invalid encoding',
+    ...
+    // 2. message for matches and parameter
+    'matches'   => [
+        'number' => 'only numbers (0-9)',
+        ...
+    ],
+);
+```
+
+whereas the error messages are determined as follows:
+
+1.   message set by `message` rule,
 2.   method and parameter specific message,
 3.   method specific message,
 4.   type specific message, then,
 5.   general message
 
-### example 1) message to specify by message rule
 
-for tailored message, use `message` method to set its message.
+#### 1. use `message` rule
+
+use `message` method to set its message.
 
 ```php
 $input->set('text')->asText()->required()->message('Oops!'));
 echo $input->getMessage('text'); // 'Oops!'
 ```
 
-### example 2) method and parameter specific message
+#### 2. method and parameter specific message
 
 filter, `matches` has its message based on the parameter. 
 
 ```php
-$input->set('text', $input->isText->matches('code'));
+$input->set('text')->asText()->matches('code');
 echo $input->getMessage('code'); // 'only alpha-numeric characters'
 ```
 
-### example 3 ) method specific message
+#### 3. method specific message
 
 filters such as `required` and `sameWith` has message.
 And lastly, there is a generic message for general errors. 
 
 ```php
-$validate->verify( 'text', $rule('text')->required() );
+$input->set('text')->asText()->required();
 echo $input->getMessage('text'); // 'required input'
 ```
 
-### example 4) type specific message
+#### 4. type specific message
 
 ```php
-$input->set('text', $input->isDate->required());
+$input->set('date')->asDate();
 echo $input->getMessage('date'); // 'invalid date'
 ```
 
-### example 5) general message
+#### 5. general message
 
 uses generic message, if all of the above rules fails.
 
 ```php
-$input->set('text', $input->pattern('[abc]'));
+$input->set('text')->asText()->pattern('[abc]');
 echo $input->getMessage('text'); // 'invalid input'
 ```
