@@ -73,12 +73,16 @@ class Dio
     }
 
     /**
-     * @param string $type
+     * @param string $key
      * @return Rules
      */
-    public function getRule($type)
+    public function getRule($key)
     {
-        return $this->ruler->withType($type);
+        $this->isEvaluated = false;
+        if (array_key_exists($key, $this->rules)) {
+            return $this->rules[$key];
+        }
+        return null;
     }
 
     /**
@@ -88,7 +92,6 @@ class Dio
     public function set($key)
     {
         $this->isEvaluated = false;
-        unset($this->found[$key]);
 
         $rules = clone $this->ruler;
         $this->rules[$key] = $rules;
@@ -105,7 +108,6 @@ class Dio
             return;
         }
         foreach($this->rules as $key => $rule) {
-            if(array_key_exists($key, $this->found)) continue;
             $this->evaluateAndGet($key);
         }
     }
@@ -121,6 +123,9 @@ class Dio
      */
     public function get($key)
     {
+        if (array_key_exists($key, $this->found)) {
+            return $this->found[$key];
+        }
         $valTO = $this->evaluate($key);
         if ($valTO->fails()) {
             return false;

@@ -426,4 +426,18 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals( true, $validation->fails() );
         $this->assertEquals( 'required item', $validation->getMessages('done') );
     }
+
+    /**
+     * @test
+     */
+    function getRules_retrieves_rules()
+    {
+        $this->validate->source([]);
+        $rule1 = $this->validate->set('flag')->asText();
+        $rule2 = $this->validate->set('done')->asText()->requiredIf('flag', ['a']);
+        
+        $this->assertTrue($rule1 === $this->validate->getRule('flag'));
+        $this->assertTrue($rule2 === $this->validate->getRule('done'));
+        $this->assertTrue(is_null($this->validate->getRule('none')));
+    }
 }
