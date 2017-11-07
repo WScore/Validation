@@ -203,29 +203,29 @@ class Rules implements \ArrayAccess, \IteratorAggregate
         'confirm' => 'sameWith',
         'err_msg' => 'message',
     ];
-    
-    private $simples = [
-        'strToLower' => ['string', self::STRING_LOWER],
-        'strToUpper' => ['string', self::STRING_UPPER],
+
+    public $simplifiedMethods = [
+        'strToLower'   => ['string', self::STRING_LOWER],
+        'strToUpper'   => ['string', self::STRING_UPPER],
         'strToCapital' => ['string', self::STRING_CAPITAL],
-        
-        'mbToHankaku' => ['mbConvert', self::MB_HANKAKU],
-        'mbToZenkaku' => ['mbConvert', self::MB_ZENKAKU],
+
+        'mbToHankaku'         => ['mbConvert', self::MB_HANKAKU],
+        'mbToZenkaku'         => ['mbConvert', self::MB_ZENKAKU],
         'mbToHankakuKatakana' => ['mbConvert', self::MB_HAN_KANA],
-        'mbToHiragana' => ['mbConvert', self::MB_HIRAGANA],
-        'mbToKatakana' => ['mbConvert', self::MB_KATAKANA],
-        
-        'sanitizeMail' => ['sanitize', 'mail'],
-        'sanitizeFloat' => ['sanitize', 'float'],
-        'sanitizeInt' => ['sanitize', 'int'],
-        'sanitizeUrl' => ['sanitize', 'url'],
+        'mbToHiragana'        => ['mbConvert', self::MB_HIRAGANA],
+        'mbToKatakana'        => ['mbConvert', self::MB_KATAKANA],
+
+        'sanitizeMail'   => ['sanitize', 'mail'],
+        'sanitizeFloat'  => ['sanitize', 'float'],
+        'sanitizeInt'    => ['sanitize', 'int'],
+        'sanitizeUrl'    => ['sanitize', 'url'],
         'sanitizeString' => ['sanitize', 'string'],
-        
-        'matchNumber' => ['match', 'number'],
+
+        'matchNumber'  => ['match', 'number'],
         'matchInteger' => ['match', 'int'],
-        'matchFloat' => ['match', 'float'],
-        'matchCode' => ['match', 'code'],
-        'matchMail' => ['match', 'mail'],
+        'matchFloat'   => ['match', 'float'],
+        'matchCode'    => ['match', 'code'],
+        'matchMail'    => ['match', 'mail'],
     ];
     
     /**
@@ -235,9 +235,9 @@ class Rules implements \ArrayAccess, \IteratorAggregate
      */
     public function __call($rule, $args)
     {
-        if (isset($this->simples[$rule])) {
-            $args = [$this->simples[$rule][1]];
-            $rule = $this->simples[$rule][0];
+        if (isset($this->simplifiedMethods[$rule])) {
+            $args = [$this->simplifiedMethods[$rule][1]];
+            $rule = $this->simplifiedMethods[$rule][0];
         }
         if(empty($args)) {
             $value = true;
