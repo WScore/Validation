@@ -111,6 +111,7 @@ class Rules implements \ArrayAccess, \IteratorAggregate
         /** @noinspection PhpIncludeInspection */
         $types = include($dir . "validation.types.php");
         foreach ($types as $key => $info) {
+            $key = strtolower($key);
             $this->filterTypes[$key] = $info;
         }
     }
@@ -137,10 +138,10 @@ class Rules implements \ArrayAccess, \IteratorAggregate
     public function applyType($type)
     {
         $type       = strtolower($type);
-        $this->type = $type;
-        if ($type == 'email') {
+        if ($type === 'email') {
             $type = 'mail';
         }
+        $this->type = $type;
         if (!array_key_exists($type, $this->filterTypes)) {
             throw new \BadMethodCallException("undefined type: {$type}");
         }

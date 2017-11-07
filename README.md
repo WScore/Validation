@@ -96,12 +96,14 @@ The predefined types are:
 * integer
 * float
 * date
-* dateYM
 * datetime
-* time
+* month
+* dateYMD
+* dateYM
+* dateHis
+* timeHis
 * timeHi
 * tel
-* fax
 
 which are defined in `Locale/{locale}/validation.types.php` file.
 

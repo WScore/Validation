@@ -178,17 +178,37 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals( ['test' => [1 => 'only numbers (0-9)']], $errors );
     }
 
+    /**
+     * @test
+     */
+    function for_date_type()
+    {
+        $source = ['date' => '2017-08-01', 'bad' => 'abcDef', 'month' => '2017-08'];
+        $input = $this->factory->on($source);
+
+        $input->set('date')->asDate();
+        $this->assertTrue($input->passes());
+        $this->assertEquals('2017-08-01', $input->getAll()['date']);
+
+        $input->set('bad')->asDate();
+        $this->assertTrue($input->fails());
+        $this->assertEquals('', $input->getAll()['bad']);
+
+        $input->set('month')->asMonth();
+        $this->assertEquals('2017-08', $input->getAll()['month']);
+    }
+
     // +----------------------------------------------------------------------+
     //  test for multiple input
     // +----------------------------------------------------------------------+
     /**
      * @test
      */
-    function find_multiple_date_value()
+    function find_multiple_dateYMD_value()
     {
         $source = array( 'test_y'=>'2013', 'test_m'=>'11', 'test_d'=>'08' );
         $this->validate->source($source );
-        $this->validate->set( 'test' )->asDate();
+        $this->validate->set( 'test' )->asDateYMD();
         $got = $this->validate->get('test');
 
         $this->assertEquals( '2013-11-08', $got );
@@ -201,11 +221,11 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
     /**
      * @test
      */
-    function find_multiple_datetime_value()
+    function find_multiple_dateHis_value()
     {
         $source = array( 'test_y'=>'2013', 'test_m'=>'11', 'test_d'=>'08', 'test_h'=>'15', 'test_i'=>'13', 'test_s'=>'59' );
         $this->validate->source($source );
-        $this->validate->set( 'test' )->asDatetime();
+        $this->validate->set( 'test' )->asDateHis();
         $got = $this->validate->get('test');
 
         $this->assertEquals( '2013-11-08 15:13:59', $got );

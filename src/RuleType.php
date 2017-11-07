@@ -4,8 +4,8 @@ namespace WScore\Validation;
 /**
  * Class RuleType
  *
- * @package WScore\Validation
- *
+ * for HTML/HTML5 input types:
+ * 
  * @method Rules asText()
  * @method Rules asMail()
  * @method Rules asBinary()
@@ -14,10 +14,21 @@ namespace WScore\Validation;
  * @method Rules asFloat()
  * @method Rules asDate()
  * @method Rules asDatetime()
+ * @method Rules asMonth()
+ * 
+ * for multiple type:
+ * 
+ * @method Rules asDateYMD()
  * @method Rules asDateYM()
+ * @method Rules asDateHis()
  * @method Rules asTime()
  * @method Rules asTimeHi()
  * @method Rules asTel()
+ * 
+ * for multi-byte (Japanese) input:
+ * 
+ * @method Rules asHiragana()
+ * @method Rules asKatakana()
  */
 class RuleType
 {
@@ -43,11 +54,11 @@ class RuleType
      */
     public function __call($name, $args)
     {
-        if (substr($name, 0, 2) === 'as') {
-            $type = strtolower(substr($name, 2));
-            $this->rules->applyType($type);
-            return $this->rules;
+        if (substr($name, 0, 2) !== 'as') {
+            throw new \BadMethodCallException;
         }
-        throw new \BadMethodCallException;
+        $type = substr($name, 2);
+        $this->rules->applyType($type);
+        return $this->rules;
     }
 }
