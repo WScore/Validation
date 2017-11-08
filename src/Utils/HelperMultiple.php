@@ -33,7 +33,7 @@ class HelperMultiple
      * @param string|array $option
      * @return mixed|null|string
      */
-    public static function prepare_multiple($name, $source, $option)
+    public static function prepare($name, $source, $option)
     {
         // get options.
         if (is_string($option)) {

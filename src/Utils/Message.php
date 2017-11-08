@@ -77,10 +77,10 @@ class Message
         }
         // 2. use message for a method/parameter set.
         if (is_array($message)) {
-            return Helper::arrGet($message, $parameter, null);
+            return (string) Helper::arrGet($message, $parameter, null);
         }
         // 3. use message for a specific method.
-        return $message;
+        return (string) $message;
     }
     // +----------------------------------------------------------------------+
 }

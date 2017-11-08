@@ -245,8 +245,8 @@ class Filter
      */
     public function filter_matches($v, $p)
     {
-        $option = Helper::arrGet($this->matchType, $p, $p);
-        if (!preg_match("/^{$option}\$/", $v->getValue())) {
+        $matchType = Helper::arrGet($this->matchType, $p, $p);
+        if (!preg_match("/^{$matchType}\$/", $v->getValue())) {
             $v->setError(__METHOD__, $p);
         }
     }
@@ -257,8 +257,8 @@ class Filter
      */
     public function filter_kanaType($v, $p)
     {
-        $option = Helper::arrGet($this->kanaType, $p, $p);
-        if (!preg_match("/^{$option}\$/u", $v->getValue())) {
+        $kanaType = Helper::arrGet($this->kanaType, $p, $p);
+        if (!preg_match("/^{$kanaType}\$/u", $v->getValue())) {
             $v->setError(__METHOD__, $p);
         }
     }

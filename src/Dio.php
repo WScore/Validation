@@ -195,14 +195,10 @@ class Dio
      * @param array $error
      * @return array
      */
-    protected function _findClean($data, $error)
+    protected function _findClean(array $data, array $error)
     {
-        if (empty($error)) {
-            // no error at all.
-            return $data;
-        }
-        foreach ($data as $key => $val) {
-            if (!array_key_exists($key, $error)) {
+        foreach ($error as $key => $val) {
+            if (!array_key_exists($key, $data)) {
                 continue;
             }
             if (is_array($data[$key]) && is_array($error[$key])) {
@@ -284,20 +280,22 @@ class Dio
      *
      * @param string      $key
      * @param array|Rules $rules
-     * @return string
+     * @return string|array
      */
     public function find($key, $rules = [])
     {
         if (Utils\Helper::arrGet($rules, 'multiple')) {
             // check for multiple case i.e. Y-m-d.
-            return Utils\HelperMultiple::prepare_multiple($key, $this->source, $rules['multiple']);
+            return Utils\HelperMultiple::prepare($key, $this->source, $rules['multiple']);
         }
         $value = Helper::arrGet($this->source, $key);
-        if (is_array($value) && !Utils\Helper::arrGet($rules, 'array')) {
-            return '';
+        if (is_array($value)) {
+            return Utils\Helper::arrGet($rules, 'array')
+                ? $value
+                : '';
         }
 
-        return $value;
+        return (string) $value;
     }
 
     /**
@@ -311,10 +309,10 @@ class Dio
     private function setupRules($rules)
     {
         // prepares filter for requiredIf
-        $rules = Utils\Helper::prepare_requiredIf($this, $rules);
+        $rules = Utils\HelperRequiredIf::prepare($this, $rules);
 
         // prepares filter for sameWith.
-        $rules = Utils\Helper::prepare_sameWith($this, $rules);
+        $rules = Utils\HelperSameWith::prepare($this, $rules);
 
         return $rules;
     }
