@@ -37,7 +37,7 @@ class HelperMultiple
     {
         // get options.
         if (is_string($option)) {
-            $option = Helper::arrGet(self::$multiples, $option, array());
+            $option = (array) Helper::arrGet(self::$multiples, $option, array());
         }
         $lists = self::find_multiple($name, $source, $option);
         $found = self::merge_multiple($option, $lists);

@@ -59,8 +59,8 @@ class Verify
     }
 
     /**
-     * @param string      $value
-     * @param array|Rules $rules
+     * @param string|array $value
+     * @param array|Rules  $rules
      * @return ValueToInterface
      */
     public function apply($value, $rules)

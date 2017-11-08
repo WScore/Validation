@@ -61,7 +61,7 @@ class Message
         }
 
         // 5. use general error message.
-        return Helper::arrGet($this->messages, '0', '');
+        return (string) Helper::arrGet($this->messages, '0', '');
     }
 
     /**
