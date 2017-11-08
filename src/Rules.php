@@ -8,6 +8,7 @@ namespace WScore\Validation;
  *
  */
 use Traversable;
+use WScore\Validation\Utils\Helper;
 
 /**
  * @method Rules err_msg(string $error_message)
@@ -190,10 +191,10 @@ class Rules implements \ArrayAccess, \IteratorAggregate
         }
         foreach ($filters as $rule => $parameter) {
             if (is_numeric($rule)) {
-                $rule      = $parameter;
-                $parameter = true;
+                $this->filter[$parameter] = true;
+            } else {
+                $this->filter[$rule] = $parameter;
             }
-            $this->filter[$rule] = $parameter;
         }
 
         return $this;
@@ -229,27 +230,38 @@ class Rules implements \ArrayAccess, \IteratorAggregate
     ];
     
     /**
-     * @param $rule
-     * @param $args
+     * @param string $rule
+     * @param array  $args
      * @return $this
      */
     public function __call($rule, $args)
+    {
+        list($name, $value) = $this->prepareCalls($rule, $args);
+        $name = Helper::arrGet($this->convertRules, $name, $name);
+        $this->filter[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * @param $rule
+     * @param $args
+     * @return array
+     */
+    private function prepareCalls($rule, $args)
     {
         if (isset($this->simplifiedMethods[$rule])) {
             $args = [$this->simplifiedMethods[$rule][1]];
             $rule = $this->simplifiedMethods[$rule][0];
         }
-        if(empty($args)) {
+        if (empty($args)) {
             $value = true;
-        } elseif(count($args) === 1) {
+        } elseif (count($args) === 1) {
             $value = $args[0];
         } else {
             $value = $args;
         }
-        $rule = array_key_exists($rule, $this->convertRules) ? $this->convertRules[$rule] : $rule;
-        $this->filter[$rule] = $value;
-
-        return $this;
+        return array($rule, $value);
     }
     // +----------------------------------------------------------------------+
     //  getting information about Rule

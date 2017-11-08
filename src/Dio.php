@@ -1,6 +1,8 @@
 <?php
 namespace WScore\Validation;
 
+use WScore\Validation\Utils\Helper;
+
 /**
  * Class Dio
  *
@@ -171,8 +173,7 @@ class Dio
     public function getSafe()
     {
         $this->evaluateAll();
-        $safeData = $this->found;
-        $this->_findClean($safeData, $this->messages);
+        $safeData = $this->_findClean($this->found, $this->messages);
 
         return $safeData;
     }
@@ -192,23 +193,25 @@ class Dio
     /**
      * @param array $data
      * @param array $error
+     * @return array
      */
-    protected function _findClean(&$data, $error)
+    protected function _findClean($data, $error)
     {
         if (empty($error)) {
             // no error at all.
-            return;
+            return $data;
         }
         foreach ($data as $key => $val) {
             if (!array_key_exists($key, $error)) {
-                continue; // no error.
+                continue;
             }
             if (is_array($data[$key]) && is_array($error[$key])) {
-                $this->_findClean($data[$key], $error[$key]);
-            } elseif ($error[$key]) { // error message exist.
+                $data[$key] = $this->_findClean($data[$key], $error[$key]);
+            } else {
                 unset($data[$key]);
             }
         }
+        return $data;
     }
 
     // +----------------------------------------------------------------------+
@@ -285,16 +288,11 @@ class Dio
      */
     public function find($key, $rules = [])
     {
-        // find a value from data source.
-        $value = null;
         if (Utils\Helper::arrGet($rules, 'multiple')) {
             // check for multiple case i.e. Y-m-d.
             return Utils\HelperMultiple::prepare_multiple($key, $this->source, $rules['multiple']);
         }
-        if (array_key_exists($key, $this->source)) {
-            // simplest case.
-            $value = $this->source[$key];
-        }
+        $value = Helper::arrGet($this->source, $key);
         if (is_array($value) && !Utils\Helper::arrGet($rules, 'array')) {
             return '';
         }

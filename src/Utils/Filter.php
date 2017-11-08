@@ -117,19 +117,16 @@ class Filter
      */
     public function filter_datetime($v, $p)
     {
-        try {
-            if (is_bool($p) && $p) {
-                $p = 'Y-m-d H:i:s';
-            }
-            $dt = \DateTime::createFromFormat($p, $v->getValue());
-            if ($dt) {
-                $v->setValue($dt->format($p));
-                return;
-            }
-        } catch (\Exception $e) {
+        if (is_bool($p) && $p) {
+            $p = 'Y-m-d H:i:s';
         }
-        $v->setValue('');
-        $v->setError(__METHOD__, $p);
+        $dt = \date_create_from_format($p, $v->getValue());
+        if (!$dt) {
+            $v->setValue(null);
+            $v->setError(__METHOD__, $p);
+            return;
+        }
+        $v->setValue($dt->format($p));
     }
 
     /**
