@@ -81,6 +81,7 @@ class Dio
     public function getRule($key)
     {
         $this->isEvaluated = false;
+        unset($this->found[$key]);
         if (array_key_exists($key, $this->rules)) {
             return $this->rules[$key];
         }
@@ -97,6 +98,7 @@ class Dio
 
         $rules = clone $this->ruler;
         $this->rules[$key] = $rules;
+        unset($this->found[$key]);
         
         return new RuleType($rules);
     }
