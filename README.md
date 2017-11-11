@@ -87,7 +87,7 @@ Select validation type by `as{Type}()` after `set` method,
 $input->set('key')->as{Type}()->{validationRule}();
 ```
 
-The predefined types are:
+There are following predefined types that are compatible with HTML5 input types.
 
 * binary
 * text
@@ -98,12 +98,15 @@ The predefined types are:
 * date
 * datetime
 * month
+* tel
+
+And there are some multiple filed types.  
+
 * dateYMD
 * dateYM
 * dateHis
 * timeHis
 * timeHi
-* tel
 
 which are defined in `Locale/{locale}/validation.types.php` file.
 
@@ -123,10 +126,23 @@ Available filter (or rules) types.
  * `array()`:                      allows array input.
  * `noNull(bool $not = true)`:     removes null character. 
  * `encoding(string $encoding)`:   validates on character encoding (default is UTF-8). 
- * `mbConvert(string $type)`:      converts kana-set (in Japanese). 
+ * `mbConvert(string $type)`:      converts kana-set (in Japanese).
+    * `mbToHankaku()`: converts alpha-numeric zenkaku characters to hankaku. 
+    * `mbToZenkaku()`: converts alpha-numeric hankaku characters to zenkaku.
+    * `mbToHankakuKatakana()`: converts zenkaku katakana to hankaku. 
+    * `mbToHiragana()`: converts katakana to zenkaku hiragana. 
+    * `mbToKatakana()`: converts hiragana to zenkaku katakana. 
  * `trim(bool $trim = true)`:      trims input string. 
- * `sanitize(string $type)`:       sanitize value. 
- * `string(string $type)`:         converts string to upper/lower/etc. 
+ * `sanitize(string $type)`:       sanitize value.
+    * `sanitizeMail()`: sanitize for mail input.
+    * `sanitizeFloat()`: sanitize for floating number. 
+    * `sanitizeInt()`: sanitize for integer number. 
+    * `sanitizeUrl()`: sanitize for ULR input. 
+    * `sanitizeString()`: sanitize as a string. 
+ * `string(string $type)`:         converts string to upper/lower/etc.
+    * `strToLower()`: converts string to lower letters.
+    * `strToUpper()`: converts string to upper letters.
+    * `strToCapital()`: capitalizes a string. 
  * `default(string $value)`:       sets default value if not set. 
  * `required(bool $required = true)`:          required value
  * `requiredIf(string $key, array $in=[])`:    set required if $key exists (or in $in). 
@@ -134,8 +150,18 @@ Available filter (or rules) types.
  * `code(string $type)`:           
  * `maxLength(int $length)`:           maximum character length. 
  * `pattern(string $reg_expression)`:  preg_match pattern
- * `matches(string $match_type)`:      preset regex patterns (number, int, float, code, mail).
- * `kanaType(string $match_type)`:     checks kana-type ().
+ * `matches(string $match_type)`:      preset regex patterns (number, int, float, code, mail). 
+    using matches rules provides more specific error messages compared to patterns rule. 
+    * `matchNumber()`: matches for numeric input. 
+    * `matchInteger()`: matches for integer input. 
+    * `matchFloat()`: matches for floating number input. 
+    * `matchCode()`: matches for "[-_0-9a-zA-Z]". 
+    * `matchMail()`: matches for simple mail pattern. 
+ * `kanaType(string $match_type)`:     checks kana-type.
+    * `mbOnlyKatakana()`: verifies only zenkaku katakana. 
+    * `mbOnlyHiragana()`: verifies only zenkaku hiragana. 
+    * `mbOnlyHankaku()`: verifies only hankaku characters (i.e. ASCII). 
+    * `mbOnlyHankakuKatakana()`: verifies only hankaku characters. 
  * `min(int $min)`:                    minimum numeric value.
  * `max(int $max)`:                    maximum numeric value.
  * `range(array $range)`:              range of [min, max].
@@ -153,17 +179,17 @@ To validate a list of input data, such as checkbox, use `array()` rules as follo
 When the validation fails, it returns the error message as array.
 
 ```php
-$input->source( array( 'list' => [ '1', '2', 'bad', '4' ] ) );
+$input->source(array('list' => [ '1', '2', 'bad', '4' ]));
 $input->set('list')->asInteger()->array();
-if( $input->fails() ) {
+if ($input->fails()) {
     $values = $validation->get('list');
     $goods  = $validation->getSafe();
     $errors = $validation->message();
 }
 /*
  * $values = [ '1', '2', 'bad', '4' ];
- * $goods  = array( 'list' => [ '1', '2', '4' ] );
- * $errors = array( 'list' => [ 2 => 'not an integer' ] );
+ * $goods  = array('list' => [ '1', '2', '4' ]);
+ * $errors = array('list' => [ 2 => 'not an integer' ]);
  */
 ```
 
@@ -174,7 +200,7 @@ if( $input->fails() ) {
 For instance, `date`, `dateYM`, `datetime` types 
 
 ```php
-$input->source( [ 'bd_y' => '2001', 'bd_m' => '09', 'bd_d' => '25' ] );
+$input->source([ 'bd_y' => '2001', 'bd_m' => '09', 'bd_d' => '25' ]);
 echo $validation->set('bd')->asDate(); // 2001-09-25
 ```
 
@@ -183,10 +209,10 @@ use ```multiple``` rules to construct own multiple inputs as,
 ```php
 // for inputs like,
 // [ 'ranges_y1' => '2001', 'ranges_m1' => '09', 'ranges_y2' => '2011', 'ranges_m2' => '11' ]
-$input->set('ranges')->asText()->multiple( [
+$input->set('ranges')->asText()->multiple([
     'suffix' => 'y1,m1,y2,m2',
     'format' => '%04d/%02d - %04d/%02d'
-] );
+]);
 ```
 
 where `suffix` lists the postfix for the inputs,
@@ -203,7 +229,7 @@ $input->source([ 'text1' => '123ABC', 'text2' => '123abc' ] );
 echo $validation->set('text1')
     ->asText()
 	->string('lower')
-	->confirm('text2') ); // 123abc
+	->confirm('text2'); // 123abc
 ```
 
 Please note that the actual input strings are different.
@@ -229,22 +255,21 @@ Use a closure as custom validation filter.
  * @param ValueTO $v
  */
 $filter = function( $v ) {
-    $val = $v->getValue();
-    $val .= ':customized!';
-    $v->setValue( $val );
-    $v->setError(__METHOD__);
-    $v->setMessage('Closure with Error');
+    $val = $v->getValue();  // get the value to validate. 
+    $val .= ':customized!'; // you can alter the value.
+    $v->setValue( $val );   // and reset the value. 
+    
+    $v->setError(__METHOD__); // set error if the custome validation fails.
+    $v->setMessage('Closure with Error'); // you can set error message as well.
 };
-$input->asText('test')->addCustom( 'myFilter', $filter );
+$input->asText('test')->addCustom('myFilter', $filter);
 ```
 
 You cannot pass parameter (the closure is the parameter).
 argument is the ValueTO object which can be used to handle
 error and messages.
 
-setting error with, well, actually, any string,
-but `__METHOD__` maybe helpful. this will break the
-filter loop, i.e. no filter will be evaluated.
+Setting an error to ValueTO will break the filter loop, i.e. no further rules will be evaluated.
 
 ### setting values and errors
 
@@ -315,24 +340,27 @@ echo $input->getMessage('text'); // 'Oops!'
 
 #### 2. method and parameter specific message
 
-filter, `matches` has its message based on the parameter. 
+some filters, such as `matches`, has its message based on the parameter. 
 
 ```php
-$input->set('text')->asText()->matches('code');
+$input->set('int')->asText()->matchInteger();
+$input->set('code')->asText()->matchCode();
+echo $input->getMessage('int'); // 'not an integer'
 echo $input->getMessage('code'); // 'only alpha-numeric characters'
 ```
 
 #### 3. method specific message
 
-filters such as `required` and `sameWith` has message.
-And lastly, there is a generic message for general errors. 
+some of the filters, such as `required`, has filter specific message.
 
 ```php
 $input->set('text')->asText()->required();
-echo $input->getMessage('text'); // 'required input'
+echo $input->getMessage('text'); // 'required item'
 ```
 
 #### 4. type specific message
+
+most of the rule types has its own messages. 
 
 ```php
 $input->set('date')->asDate();
