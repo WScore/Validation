@@ -130,7 +130,7 @@ class Verify
         $method = 'filter_' . $rule;
         if (method_exists($this->filter, $method)) {
             $this->filter->$method($valueTO, $parameter);
-        } elseif (is_object($parameter) && is_callable($parameter)) {
+        } elseif (is_callable($parameter)) {
             $this->filter->applyClosure($valueTO, $parameter);
         }
     }
