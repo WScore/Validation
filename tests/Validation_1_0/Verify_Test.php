@@ -1,6 +1,7 @@
 <?php
 namespace tests\Validation_1_0;
 
+use WScore\Validation\Rules;
 use WScore\Validation\ValidationFactory;
 use WScore\Validation\Verify;
 use WScore\Validation\Utils\ValueTO;
@@ -90,7 +91,7 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
     {
         $value = $this->verify->applyFilters( '', ['matches'=>'number'] );
         $this->assertEquals( 'only numbers (0-9)', $value->message() );
-        $value = $this->verify->applyFilters( '', ['matches'=>'int'] );
+        $value = $this->verify->applyFilters( '', ['matches'=>Rules::MATCH_INTEGER] );
         $this->assertEquals( 'not an integer', $value->message() );
         $value = $this->verify->applyFilters( '', ['matches'=>'not-valid'] );
         $this->assertEquals( 'invalid input', $value->message() );
@@ -126,7 +127,7 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
         // message based on method/parameter
         $value = $v->applyFilters( '', ['matches'=>'number'] );
         $this->assertEquals( '数値のみです(0-9)', $value->message() );
-        $value = $v->applyFilters( '', ['matches'=>'int'] );
+        $value = $v->applyFilters( '', ['matches'=>Rules::MATCH_INTEGER] );
         $this->assertEquals( '整数を入力してください', $value->message() );
         $value = $v->applyFilters( '', ['matches'=>'not-valid'] );
         $this->assertEquals( '入力内容を確認して下さい', $value->message() );

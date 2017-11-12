@@ -232,11 +232,11 @@ class Filter
      * @var array
      */
     public $matchType = array(
-        'number' => '[0-9]+',
-        'int'    => '[-0-9]+',
-        'float'  => '[-.0-9]+',
-        'code'   => '[-_0-9a-zA-Z]+',
-        'mail'   => '[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]+',
+        Rules::MATCH_NUMBER  => '[0-9]+',
+        Rules::MATCH_INTEGER => '[-0-9]+',
+        Rules::MATCH_FLOAT   => '[-.0-9]+',
+        Rules::MATCH_CODE    => '[-_0-9a-zA-Z]+',
+        Rules::MATCH_MAIL    => '[a-zA-Z0-9_.-]+@[a-zA-Z0-9_.-]+\.[a-zA-Z]+',
     );
 
     /**

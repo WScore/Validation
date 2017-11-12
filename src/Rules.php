@@ -94,6 +94,15 @@ class Rules implements \ArrayAccess, \IteratorAggregate
     const ONLY_HANKAKU = 'hankaku';
     const ONLY_HANKAKU_KANA = 'hankana';
 
+    /*
+     * validates for preset preg_match patterns.
+     */
+    const MATCH_NUMBER = 'number';
+    const MATCH_INTEGER = 'int';
+    const MATCH_FLOAT = 'float';
+    const MATCH_CODE = 'code';
+    const MATCH_MAIL = 'mail';
+
     /**
      * this is the mother of $filter.
      *

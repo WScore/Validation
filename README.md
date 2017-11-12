@@ -119,7 +119,7 @@ as shown in previous example codes;
 $input->set('mail')->asMail()->required()->string(Rules::STRING_LOWER)->confirm('mail2'));
 ```
 
-Available filter (or rules) types. 
+Available filters, i.e. that may alter the value:
 
  * `message(string $message)`:     set error message.
  * `multiple(array $parameter)`:   set multiple field inputs, such as Y, m, and d. 
@@ -144,6 +144,9 @@ Available filter (or rules) types.
     * `strToUpper()`: converts string to upper letters.
     * `strToCapital()`: capitalizes a string. 
  * `default(string $value)`:       sets default value if not set. 
+
+All the verifiers, i.e. check if the value satisfies the requirements:  
+
  * `required(bool $required = true)`:          required value
  * `requiredIf(string $key, array $in=[])`:    set required if $key exists (or in $in). 
  * `loopBreak(bool $break = true)`:            breaks filter loop. 
@@ -201,7 +204,7 @@ For instance, `date`, `dateYM`, `datetime` types
 
 ```php
 $input->source([ 'bd_y' => '2001', 'bd_m' => '09', 'bd_d' => '25' ]);
-echo $validation->set('bd')->asDate(); // 2001-09-25
+echo $validation->set('bd')->asDateYMD(); // 2001-09-25
 ```
 
 use ```multiple``` rules to construct own multiple inputs as,
@@ -209,10 +212,14 @@ use ```multiple``` rules to construct own multiple inputs as,
 ```php
 // for inputs like,
 // [ 'ranges_y1' => '2001', 'ranges_m1' => '09', 'ranges_y2' => '2011', 'ranges_m2' => '11' ]
-$input->set('ranges')->asText()->multiple([
-    'suffix' => 'y1,m1,y2,m2',
-    'format' => '%04d/%02d - %04d/%02d'
-]);
+$input->set('ranges')
+    ->asText()
+    ->multiple([
+        'suffix' => 'y1,m1,y2,m2',
+        'format' => '%04d/%02d - %04d/%02d'
+    ])
+    ->pattern('[0-9]{4}/[0-9]{2} - [0-9]{4}/[0-9]{2}')
+    ->message('set year-month range');
 ```
 
 where `suffix` lists the postfix for the inputs,
@@ -228,8 +235,8 @@ to compare each other.
 $input->source([ 'text1' => '123ABC', 'text2' => '123abc' ] );
 echo $validation->set('text1')
     ->asText()
-	->string('lower')
-	->confirm('text2'); // 123abc
+    ->string('lower')
+    ->confirm('text2'); // 123abc
 ```
 
 Please note that the actual input strings are different.
@@ -340,13 +347,13 @@ echo $input->getMessage('text'); // 'Oops!'
 
 #### 2. method and parameter specific message
 
-some filters, such as `matches`, has its message based on the parameter. 
+some filters, `matches` and `kanaType`, has its message based on the parameter. 
 
 ```php
 $input->set('int')->asText()->matchInteger();
-$input->set('code')->asText()->matchCode();
+$input->set('kana')->asText()->mbOnlyKatakana();
 echo $input->getMessage('int'); // 'not an integer'
-echo $input->getMessage('code'); // 'only alpha-numeric characters'
+echo $input->getMessage('kana'); // 'only in katakana'
 ```
 
 #### 3. method specific message

@@ -1,6 +1,8 @@
 <?php
 namespace WScore\Validation\Locale;
 
+use WScore\Validation\Rules;
+
 return array(
     // 5. general error message 
     0           => 'invalid input',
@@ -26,11 +28,17 @@ return array(
     'max'       => 'exceeds max value',
     'min'       => 'below min value',
     // 2. message for matches and parameter
-    'matches'   => [
-        'number' => 'only numbers (0-9)',
-        'int'    => 'not an integer',
-        'float'  => 'not a floating number',
-        'code'   => 'only alpha-numeric characters',
-        'mail'   => 'not a valid mail address',
+    'matches' => [
+        Rules::MATCH_NUMBER  => 'only numbers (0-9)',
+        Rules::MATCH_INTEGER => 'not an integer',
+        Rules::MATCH_FLOAT   => 'not a floating number',
+        Rules::MATCH_CODE    => 'only alpha-numeric characters',
+        Rules::MATCH_MAIL    => 'not a valid mail address',
+    ],
+    'kanaType' => [
+        Rules::ONLY_HANKAKU      => 'only ASCII characters',
+        Rules::ONLY_HANKAKU_KANA => 'only half-width katakana',
+        Rules::ONLY_HIRAGANA     => 'only in hiragana',
+        Rules::ONLY_KATAKANA     => 'only in katakana',
     ],
 );

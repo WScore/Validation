@@ -1,6 +1,8 @@
 <?php
 namespace WScore\Validation\Locale;
 
+use WScore\Validation\Rules;
+
 return array(
     // 5. general error message 
     0           => '入力内容を確認して下さい',
@@ -26,11 +28,17 @@ return array(
     'max'       => '最大値を超えています。',
     'min'       => '最小値より小さい値です。',
     // 2. message for matches and parameter
-    'matches'   => [
-        'number' => '数値のみです(0-9)',
-        'int'    => '整数を入力してください',
-        'float'  => '数値を入力してください',
-        'code'   => '記号（半角英数字）です',
-        'mail'   => 'メールアドレスを入力してください',
+    'matches' => [
+        Rules::MATCH_NUMBER  => '数値のみです(0-9)',
+        Rules::MATCH_INTEGER => '整数を入力してください',
+        Rules::MATCH_FLOAT   => '数値を入力してください',
+        Rules::MATCH_CODE    => '記号（半角英数字）です',
+        Rules::MATCH_MAIL    => 'メールアドレスを入力してください',
+    ],
+    'kanaType' => [
+        Rules::ONLY_HANKAKU      => '半角のみで入力してください',
+        Rules::ONLY_HANKAKU_KANA => '半角カタカナのみで入力してください',
+        Rules::ONLY_HIRAGANA     => 'ひらがなのみで入力してください',
+        Rules::ONLY_KATAKANA     => 'カタカナのみで入力してください',
     ],
 );

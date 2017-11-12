@@ -44,7 +44,7 @@ class Verify
      * validates a text value, or an array of text values.
      * returns the filtered value, or false if validation fails.
      *
-     * @param string      $value
+     * @param string|array $value
      * @param array|Rules $rules
      * @return bool|string
      */
