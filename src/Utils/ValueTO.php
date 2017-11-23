@@ -83,6 +83,16 @@ class ValueTO implements ValueToInterface
     }
 
     /**
+     * @return bool|mixed
+     */
+    public function getValidValue()
+    {
+        return $this->fails() 
+            ? false 
+            : $this->getValue();
+    }
+
+    /**
      * @param mixed $value
      */
     public function setValue($value)
@@ -206,5 +216,4 @@ class ValueTO implements ValueToInterface
     {
         return (string)$this->value;
     }
-
 }

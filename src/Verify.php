@@ -1,7 +1,10 @@
 <?php
 namespace WScore\Validation;
 
+use WScore\Validation\Utils\ValueArray;
+use WScore\Validation\Utils\ValueTO;
 use WScore\Validation\Utils\ValueToInterface;
+use WScore\Validation\Utils\Filter;
 
 /**
  * Class Validate
@@ -11,12 +14,12 @@ use WScore\Validation\Utils\ValueToInterface;
 class Verify
 {
     /**
-     * @var Utils\Filter
+     * @var Filter
      */
     private $filter;
 
     /**
-     * @var Utils\ValueTO
+     * @var ValueTO
      */
     private $valueTO;
 
@@ -24,8 +27,8 @@ class Verify
     //  construction
     // +----------------------------------------------------------------------+
     /**
-     * @param Utils\Filter  $filter
-     * @param Utils\ValueTO $valueTO
+     * @param Filter  $filter
+     * @param ValueTO $valueTO
      */
     public function __construct($filter = null, $valueTO = null)
     {
@@ -72,24 +75,13 @@ class Verify
         }
         // -------------------------------
         // validating for an array input.
-        $result = array();
-        $errors = array();
-        $failed = false;
+        $values = new ValueArray();
         foreach ($value as $key => $val) {
             $valTO        = $this->apply($val, $rules);
-            $result[$key] = $valTO->getValue();
-            if ($valTO->fails()) {
-                $failed       = true;
-                $errors[$key] = $valTO->message();
-            }
-        }
-        $valTO = $this->valueTO->forge($result);
-        if ($failed) {
-            $valTO->setMessage($errors);
-            $valTO->setError('input=array'); // ouch!
+            $values->setValue($key, $valTO);
         }
 
-        return $valTO;
+        return $values;
     }
 
     /**
@@ -97,11 +89,11 @@ class Verify
      *
      * @param string      $value
      * @param array|Rules $rules
-     * @return null|Utils\ValueTO
+     * @return ValueTo
      */
     public function applyFilters($value, $rules = array())
     {
-        /** @var $filter Utils\Filter */
+        /** @var $filter Filter */
         $valueTO = $this->valueTO->forge($value);
         // loop through all the rules to validate $value.
         foreach ($rules as $rule => $parameter) {
@@ -121,9 +113,9 @@ class Verify
     }
 
     /**
-     * @param $rule
-     * @param $valueTO
-     * @param $parameter
+     * @param string $rule
+     * @param ValueTo $valueTO
+     * @param mixed $parameter
      */
     private function applyFilterMethod($rule, $valueTO, $parameter)
     {
