@@ -44,7 +44,6 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals( false, $value->fails() );
         $this->assertEquals( 'text', $value->getValue() );
         $this->assertEquals( 'text', $value );
-        $this->assertEquals( 'invalid input', $value->message() );
     }
 
     /**
@@ -52,7 +51,7 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
      */
     function apply_filter_message()
     {
-        $value = $this->verify->applyFilters( 'text', [ 'message' => 'tested' ] );
+        $value = $this->verify->applyFilters( 'text', [ 'message' => 'tested', 'pattern' => '[0-9]' ] );
         $this->assertEquals( 'tested', $value->message() );
     }
 
@@ -72,6 +71,7 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
     function get_general_error_message()
     {
         $value = $this->verify->applyFilters( '', [] );
+        $value->setError(null);
         $this->assertEquals( 'invalid input', $value->message() );
     }
 
@@ -81,6 +81,7 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
     function get_message_based_type()
     {
         $value = $this->verify->applyFilters( '', ['type'=>'mail'] );
+        $value->setError(null);
         $this->assertEquals( 'invalid mail format', $value->message() );
     }
 
@@ -108,12 +109,14 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
         $value = $v->applyFilters( ' text ', [ 'trim' => true ] );
         $this->assertEquals( 'WScore\Validation\Verify', get_class( $v ) );
 
+        $value->setError(null);
         $this->assertEquals( 'text', $value->getValue() );
         $this->assertEquals( 'text', $value );
         $this->assertEquals( '入力内容を確認して下さい', $value->message() );
 
         // general message
         $value = $v->applyFilters( '', [] );
+        $value->setError(null);
         $this->assertEquals( '入力内容を確認して下さい', $value->message() );
 
         // message based on method
@@ -122,6 +125,7 @@ class Verify_Test extends \PHPUnit_Framework_TestCase
 
         // message based on type
         $value = $v->applyFilters( '', ['type'=>'mail'] );
+        $value->setError(null);
         $this->assertEquals( 'メールアドレスが間違ってます', $value->message() );
 
         // message based on method/parameter

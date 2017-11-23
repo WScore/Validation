@@ -2,6 +2,8 @@
 namespace WScore\Validation;
 
 use WScore\Validation\Utils\Helper;
+use WScore\Validation\Utils\ValueTO;
+use WScore\Validation\Utils\ValueToInterface;
 
 /**
  * Class Dio
@@ -29,14 +31,9 @@ class Dio
     private $isEvaluated = false;
 
     /**
-     * @var array                 validated and invalidated data
+     * @var array|ValueToInterface[]                 validated and invalidated data
      */
     private $found = array();
-
-    /**
-     * @var array                 invalidated error messages
-     */
-    private $messages = array();
 
     /**
      * @var int                   number of errors (invalids)
@@ -128,7 +125,7 @@ class Dio
     public function get($key)
     {
         if (array_key_exists($key, $this->found)) {
-            return $this->found[$key];
+            return $this->found[$key]->getValidValue();
         }
         $valTO = $this->evaluate($key);
         if ($valTO->fails()) {
@@ -146,13 +143,10 @@ class Dio
     private function evaluateAndGet($key)
     {
         $valTO = $this->evaluate($key);
-        $value   = $valTO->getValue();
+        $this->setValue($key, $valTO);
 
         if ($valTO->fails()) {
-            $message = $valTO->message();
-            $this->setError($key, $message, $value);
-        } else {
-            $this->setValue($key, $value);
+            $this->err_num++;
         }
     }
 
@@ -164,7 +158,11 @@ class Dio
     public function getAll()
     {
         $this->evaluateAll();
-        return $this->found;
+        $values = [];
+        foreach($this->found as $key => $value) {
+            $values[$key] = $value->getValue();
+        }
+        return $values;
     }
 
     /**
@@ -175,9 +173,13 @@ class Dio
     public function getSafe()
     {
         $this->evaluateAll();
-        $safeData = $this->_findClean($this->found, $this->messages);
-
-        return $safeData;
+        $values = [];
+        foreach($this->found as $key => $value) {
+            if (!$value->isValue() || !$value->fails()) {
+                $values[$key] = $value->getValidValue();
+            }
+        }
+        return $values;
     }
 
     /**
@@ -187,6 +189,9 @@ class Dio
      */
     public function setValue($key, $value)
     {
+        if (!$value instanceof ValueToInterface) {
+            $value = ValueTO::newValue($value);
+        }
         $this->found[$key] = $value;
 
         return $this;
@@ -241,10 +246,18 @@ class Dio
     {
         $this->evaluateAll();
         if (!is_null($key)) {
-            return Utils\Helper::arrGet($this->messages, $key);
+            $value = $this->found[$key];
+            return $value->fails() ? $value->message(): null;
+        }
+        
+        $messages = [];
+        foreach($this->found as $key => $value) {
+            if ($value->fails()) {
+                $messages[$key] = $value->message();
+            }
         }
 
-        return $this->messages;
+        return $messages;
     }
 
     /**
@@ -255,10 +268,7 @@ class Dio
      */
     public function setError($key, $error, $value = false)
     {
-        $this->messages[$key] = $error;
-        if ($value !== false) {
-            $this->setValue($key, $value);
-        }
+        $this->found[$key] = ValueTO::newValue($value, $error);
         $this->err_num++;
 
         return $this;

@@ -14,6 +14,14 @@ class ValueArray implements ValueToInterface
     protected $error = false;
 
     /**
+     * @return bool
+     */
+    public function isValue()
+    {
+        return false;
+    }
+
+    /**
      * @param string $key
      * @param ValueToInterface $value
      */
@@ -50,7 +58,9 @@ class ValueArray implements ValueToInterface
     {
         $values = [];
         foreach($this->values as $key => $value) {
-            $values[$key] = $value->getValidValue();
+            if (!$value->fails()) {
+                $values[$key] = $value->getValidValue();
+            }
         }
         return $values;
     }

@@ -48,6 +48,22 @@ class ValueTO implements ValueToInterface
     }
 
     /**
+     * @param string|mixed $value
+     * @param string $message
+     * @return ValueTO
+     */
+    public static function newValue($value, $message = null)
+    {
+        $self = new self(null);
+        $self->reset($value);
+        if ($message) {
+            $self->message = $message;
+        }
+        
+        return $self;
+    }    
+
+    /**
      * @param $value
      * @return static
      */
@@ -59,6 +75,14 @@ class ValueTO implements ValueToInterface
         return $obj;
     }
 
+    /**
+     * @return bool
+     */
+    public function isValue()
+    {
+        return true;
+    }
+    
     /**
      * @param $value
      * @return $this
@@ -159,14 +183,22 @@ class ValueTO implements ValueToInterface
      */
     public function message()
     {
-        if (!$this->message) {
+        if (!$this->error) {
+            return '';
+        }
+        if ($this->message) {
+            return $this->message;
+        }
+        if ($this->messenger) {
             $type          = $this->getType();
             $method        = $this->getErrorMethod();
             $parameter     = $this->getParameter();
             $this->message = $this->messenger->find($type, $method, $parameter);
+            
+            return $this->message;
         }
 
-        return $this->message;
+        throw new \BadMethodCallException('cannot return a message. ');
     }
 
     /**

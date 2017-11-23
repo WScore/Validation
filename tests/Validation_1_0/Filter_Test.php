@@ -38,6 +38,7 @@ class Filter_Test extends \PHPUnit_Framework_TestCase
     function err_msg_sets_message()
     {
         $value = $this->validate->applyFilters( 'test', [ 'err_msg' => 'err-msg' ] );
+        $value->setError(null);
         $this->assertEquals( 'err-msg', $value->message() );
     }
 

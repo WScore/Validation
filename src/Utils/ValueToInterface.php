@@ -17,6 +17,11 @@ namespace WScore\Validation\Utils;
 interface ValueToInterface
 {
     /**
+     * @return bool
+     */
+    public function isValue();
+    
+    /**
      * returns the value. 
      * the value maybe invalid. 
      * 
