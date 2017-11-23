@@ -35,12 +35,12 @@ class ValueTO implements ValueToInterface
     protected $break = false;
 
     /**
-     * @var Message
+     * @var null|Message
      */
     protected $messenger;
 
     /**
-     * @param Message $messenger
+     * @param null|Message $messenger
      */
     public function __construct($messenger)
     {
@@ -187,7 +187,7 @@ class ValueTO implements ValueToInterface
         if (!$this->error) {
             return '';
         }
-        if ($this->message) {
+        if (isset($this->message)) {
             return $this->message;
         }
         if ($this->messenger) {

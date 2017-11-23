@@ -199,14 +199,20 @@ class Rules implements \ArrayAccess, \IteratorAggregate
             throw new \InvalidArgumentException("filters must be an array or a text string. ");
         }
         foreach ($filters as $rule => $parameter) {
-            if (is_numeric($rule)) {
-                $this->filter[$parameter] = true;
-            } else {
-                $this->filter[$rule] = $parameter;
-            }
+            $this->setRule($rule, $parameter);
         }
 
         return $this;
+    }
+    
+    private function setRule($rule, $parameter)
+    {
+        if (is_numeric($rule)) {
+            $rule = $parameter;
+            $parameter = true;
+        }
+        $rule = Helper::arrGet($this->convertRules, $rule, $rule);
+        $this->filter[$rule] = $parameter;
     }
 
     public $convertRules = [
@@ -246,8 +252,7 @@ class Rules implements \ArrayAccess, \IteratorAggregate
     public function __call($rule, $args)
     {
         list($name, $value) = $this->prepareCalls($rule, $args);
-        $name = Helper::arrGet($this->convertRules, $name, $name);
-        $this->filter[$name] = $value;
+        $this->setRule($name, $value);
 
         return $this;
     }

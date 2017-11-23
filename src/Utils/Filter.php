@@ -15,6 +15,24 @@ class Filter
     }
 
     /**
+     * @param string  $rule
+     * @param ValueTO $valueTO
+     * @param mixed   $parameter
+     */
+    public function apply($rule, ValueTO $valueTO, $parameter)
+    {
+        $method = 'filter_' . $rule;
+        if (method_exists($this, $method)) {
+            $this->$method($valueTO, $parameter);
+            return;
+        }
+        if (!is_string($parameter) && is_callable($parameter)) {
+            $this->applyClosure($valueTO, $parameter);
+            return;
+        }
+    }
+
+    /**
      * @param ValueTO  $v
      * @param \Closure $closure
      */
@@ -160,6 +178,12 @@ class Filter
         $v->setValue(mb_convert_kana($v->getValue(), $convert, static::$charCode));
     }
 
+    public $stringFilters = [
+        Rules::STRING_LOWER => 'strtolower',
+        Rules::STRING_UPPER => 'strtoupper',
+        Rules::STRING_CAPITAL => 'ucwords',
+    ];
+    
     /**
      * @param ValueTO $v
      * @param null    $p
@@ -167,13 +191,11 @@ class Filter
     public function filter_string($v, $p)
     {
         $val = $v->getValue();
-        if ($p == Rules::STRING_LOWER) {
-            $val = strtolower($val);
-        } elseif ($p == Rules::STRING_UPPER) {
-            $val = strtoupper($val);
-        } elseif ($p == Rules::STRING_CAPITAL) {
-            $val = ucwords($val);
+        if (!isset($this->stringFilters[$p])) {
+            throw new \InvalidArgumentException();
         }
+        $func = $this->stringFilters[$p];
+        $val = $func($val);
         $v->setValue($val);
     }
 
@@ -246,9 +268,7 @@ class Filter
     public function filter_matches($v, $p)
     {
         $matchType = Helper::arrGet($this->matchType, $p, $p);
-        if (!preg_match("/^{$matchType}\$/", $v->getValue())) {
-            $v->setError(__METHOD__, $p);
-        }
+        $this->pattern($v, $matchType, __METHOD__, $p);
     }
 
     /**
@@ -258,9 +278,7 @@ class Filter
     public function filter_kanaType($v, $p)
     {
         $kanaType = Helper::arrGet($this->kanaType, $p, $p);
-        if (!preg_match("/^{$kanaType}\$/u", $v->getValue())) {
-            $v->setError(__METHOD__, $p);
-        }
+        $this->pattern($v, $kanaType, __METHOD__, $p);
     }
 
     /**
@@ -279,8 +297,13 @@ class Filter
      */
     public function filter_pattern($v, $p)
     {
-        if (!preg_match("/^{$p}\$/", $v->getValue())) {
-            $v->setError(__METHOD__, $p);
+        $this->pattern($v, $p, __METHOD__, $p);
+    }
+    
+    private function pattern(ValueTo $v, $pattern, $method, $parameter)
+    {
+        if (!preg_match("/^{$pattern}$/", $v->getValue())) {
+            $v->setError($method, $parameter);
         }
     }
 

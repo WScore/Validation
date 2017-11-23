@@ -56,7 +56,7 @@ class HelperMultiple
      */
     private static function find_multiple($name, $source, $option)
     {
-        $sep    = Helper::arrGet($option, 'separator', '_'); //        $lists  = array();
+        $sep    = Helper::arrGet($option, 'separator', '_');
         $suffix = explode(',', $option['suffix']);
         $lists  = [];
         foreach ($suffix as $sfx) {

@@ -13,9 +13,6 @@ class Helper
      */
     public static function arrGet($arr, $key, $default = null)
     {
-        if (!is_string($key)) {
-            return $default;
-        }
         if (is_array($arr) || $arr instanceof \ArrayAccess) {
             return isset($arr[$key]) ? $arr[$key] : $default;
         }

@@ -89,7 +89,7 @@ class Verify
      *
      * @param string      $value
      * @param array|Rules $rules
-     * @return ValueTo
+     * @return ValueTO
      */
     public function applyFilters($value, $rules = array())
     {
@@ -101,7 +101,7 @@ class Verify
             if ($parameter === false) {
                 continue;
             }
-            $this->applyFilterMethod($rule, $valueTO, $parameter);
+            $this->filter->apply($rule, $valueTO, $parameter);
 
             // loop break.
             if ($valueTO->getBreak()) {
@@ -114,7 +114,7 @@ class Verify
 
     /**
      * @param string $rule
-     * @param ValueTo $valueTO
+     * @param ValueTO $valueTO
      * @param mixed $parameter
      */
     private function applyFilterMethod($rule, $valueTO, $parameter)
