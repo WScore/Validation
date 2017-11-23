@@ -58,6 +58,7 @@ class ValueTO implements ValueToInterface
         $self->reset($value);
         if ($message) {
             $self->message = $message;
+            $self->setError(null);
         }
         
         return $self;

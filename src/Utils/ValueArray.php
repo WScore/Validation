@@ -32,6 +32,14 @@ class ValueArray implements ValueToInterface
             $this->error = true;
         }
     }
+
+    /**
+     * @param string $key
+     */
+    public function deleteValue($key)
+    {
+        unset($this->values[$key]);
+    }
     
     /**
      * returns the value.
@@ -49,6 +57,17 @@ class ValueArray implements ValueToInterface
     }
 
     /**
+     * @param string $key
+     * @return null|ValueToInterface
+     */
+    public function getValueTo($key)
+    {
+        return array_key_exists($key, $this->values)
+            ? $this->values[$key]
+            : null;
+    }
+
+    /**
      * return the validated value.
      * returns false if validation fails.
      *
@@ -58,11 +77,16 @@ class ValueArray implements ValueToInterface
     {
         $values = [];
         foreach($this->values as $key => $value) {
-            if (!$value->fails()) {
+            if ($this->isValidValue($value)) {
                 $values[$key] = $value->getValidValue();
             }
         }
         return $values;
+    }
+    
+    private function isValidValue(ValueToInterface $value)
+    {
+        return !$value->isValue() || !$value->fails();
     }
 
     /**

@@ -2,6 +2,7 @@
 namespace WScore\Validation;
 
 use WScore\Validation\Utils\Helper;
+use WScore\Validation\Utils\ValueArray;
 use WScore\Validation\Utils\ValueTO;
 use WScore\Validation\Utils\ValueToInterface;
 
@@ -31,7 +32,7 @@ class Dio
     private $isEvaluated = false;
 
     /**
-     * @var array|ValueToInterface[]                 validated and invalidated data
+     * @var ValueArray                 validated and invalidated data
      */
     private $found = array();
 
@@ -60,6 +61,7 @@ class Dio
     {
         $this->verify = $verify;
         $this->ruler  = $rules;
+        $this->found  = new ValueArray();
     }
 
     /**
@@ -78,7 +80,7 @@ class Dio
     public function getRule($key)
     {
         $this->isEvaluated = false;
-        unset($this->found[$key]);
+        $this->found->deleteValue($key);
         if (array_key_exists($key, $this->rules)) {
             return $this->rules[$key];
         }
@@ -95,8 +97,8 @@ class Dio
 
         $rules = clone $this->ruler;
         $this->rules[$key] = $rules;
-        unset($this->found[$key]);
-        
+        $this->found->deleteValue($key);
+
         return new RuleType($rules);
     }
     
@@ -124,15 +126,12 @@ class Dio
      */
     public function get($key)
     {
-        if (array_key_exists($key, $this->found)) {
-            return $this->found[$key]->getValidValue();
-        }
         $valTO = $this->evaluate($key);
         if ($valTO->fails()) {
             return false;
         }
 
-        return $valTO->getValue();
+        return $valTO->getValidValue();
     }
 
     /**
@@ -158,11 +157,8 @@ class Dio
     public function getAll()
     {
         $this->evaluateAll();
-        $values = [];
-        foreach($this->found as $key => $value) {
-            $values[$key] = $value->getValue();
-        }
-        return $values;
+
+        return $this->found->getValue();
     }
 
     /**
@@ -173,13 +169,8 @@ class Dio
     public function getSafe()
     {
         $this->evaluateAll();
-        $values = [];
-        foreach($this->found as $key => $value) {
-            if (!$value->isValue() || !$value->fails()) {
-                $values[$key] = $value->getValidValue();
-            }
-        }
-        return $values;
+
+        return $this->found->getValidValue();
     }
 
     /**
@@ -192,31 +183,11 @@ class Dio
         if (!$value instanceof ValueToInterface) {
             $value = ValueTO::newValue($value);
         }
-        $this->found[$key] = $value;
+        $this->found->setValue($key, $value);
 
         return $this;
     }
-
-    /**
-     * @param array $data
-     * @param array $error
-     * @return array
-     */
-    protected function _findClean(array $data, array $error)
-    {
-        foreach ($error as $key => $val) {
-            if (!array_key_exists($key, $data)) {
-                continue;
-            }
-            if (is_array($data[$key]) && is_array($error[$key])) {
-                $data[$key] = $this->_findClean($data[$key], $error[$key]);
-            } else {
-                unset($data[$key]);
-            }
-        }
-        return $data;
-    }
-
+    
     // +----------------------------------------------------------------------+
     //  errors and messages
     // +----------------------------------------------------------------------+
@@ -246,18 +217,11 @@ class Dio
     {
         $this->evaluateAll();
         if (!is_null($key)) {
-            $value = $this->found[$key];
-            return $value->fails() ? $value->message(): null;
+            $value = $this->found->getValueTo($key);
+            return $value ? $value->message() : '';
         }
         
-        $messages = [];
-        foreach($this->found as $key => $value) {
-            if ($value->fails()) {
-                $messages[$key] = $value->message();
-            }
-        }
-
-        return $messages;
+        return $this->found->message();
     }
 
     /**
@@ -268,7 +232,7 @@ class Dio
      */
     public function setError($key, $error, $value = false)
     {
-        $this->found[$key] = ValueTO::newValue($value, $error);
+        $this->found->setValue($key, ValueTO::newValue($value, $error));
         $this->err_num++;
 
         return $this;
@@ -277,16 +241,6 @@ class Dio
     // +----------------------------------------------------------------------+
     //  find and validate and save it to found
     // +----------------------------------------------------------------------+
-    /**
-     * @param string      $value
-     * @param Rules|array $rules
-     * @return bool|string
-     */
-    public function verify($value, $rules)
-    {
-        return $this->verify->is($value, $rules);
-    }
-
     /**
      * finds a value with $key in the source data.
      *

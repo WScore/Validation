@@ -46,7 +46,7 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals('tested', $input->get('more'));
         $this->assertEquals('tested', $input->get('extra'));
         $this->assertEquals('', $input->get('none'));
-        $this->assertEquals(['more' => 'tested', 'extra' => 'tested'], $input->getAll());
+        $this->assertEquals(['more' => 'tested', 'extra' => 'tested'], $input->getSafe());
         $this->assertFalse($input->fails());
         $this->assertTrue($input->passes());
     }
@@ -459,5 +459,26 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $this->assertTrue($rule1 === $this->validate->getRule('flag'));
         $this->assertTrue($rule2 === $this->validate->getRule('done'));
         $this->assertTrue(is_null($this->validate->getRule('none')));
+    }
+
+    /**
+     * @test
+     */
+    function setError_sets_error_and_message()
+    {
+        $source = ['test' => 'tested', 'more' => 'tested'];
+        $input  = $this->factory->on($source);
+        $input->set('test')->asText();
+        $input->set('more')->asText();
+        $this->assertTrue($input->passes());
+        
+        $message = 'set error test';
+        $all = $source;
+        $all['bad'] = 'error';
+        $input->setError('bad', $message, 'error');
+        $this->assertFalse($input->passes());
+        $this->assertEquals(['bad' => $message], $input->getMessages());
+        $this->assertEquals($all, $input->getAll());
+        $this->assertEquals($source, $input->getSafe());
     }
 }
