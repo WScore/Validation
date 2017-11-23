@@ -183,16 +183,16 @@ When the validation fails, it returns the error message as array.
 
 ```php
 $input->source(array('list' => [ '1', '2', 'bad', '4' ]));
-$input->set('list')->asInteger()->array();
+$input->set('list')->asInteger()->array()->required();
 if ($input->fails()) {
     $values = $validation->get('list');
     $goods  = $validation->getSafe();
     $errors = $validation->message();
 }
 /*
- * $values = [ '1', '2', 'bad', '4' ];
+ * $values = [ '1', '2', '', '4' ];
  * $goods  = array('list' => [ '1', '2', '4' ]);
- * $errors = array('list' => [ 2 => 'not an integer' ]);
+ * $errors = array('list' => [ 2 => 'required item' ]);
  */
 ```
 

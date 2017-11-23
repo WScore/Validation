@@ -481,4 +481,46 @@ class Dio_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals($all, $input->getAll());
         $this->assertEquals($source, $input->getSafe());
     }
+
+    /**
+     * @test
+     */
+    function invalid_array_input_integer()
+    {
+        $list   = [1, 2, 'bad', 4];
+        $source = ['list' => $list];
+        $input  = $this->factory->on($source);
+        $input->set('list')->asInteger()->required()->array();
+        $this->assertEquals(false, $input->get('list'));
+        $this->assertTrue($input->fails());
+        $safe = $list;
+        unset($safe[2]);
+        $this->assertEquals($safe, $input->getSafe()['list']);
+        $all = $list;
+        $all[2] = '';
+        $this->assertEquals($all, $input->getAll()['list']);
+        $this->assertEquals(array(2 => 'required item'), $input->getMessages()['list']);
+    }
+
+    /**
+     * @test
+     */
+    function invalid_array_input_string()
+    {
+        $list   = ['good', 'b@d', 'OK'];
+        $source = ['list' => $list];
+        $input  = $this->factory->on($source);
+        $input->set('list')->asText()->pattern('[a-z]+')->strToLower()->array();
+        $this->assertEquals(false, $input->get('list'));
+        $this->assertTrue($input->fails());
+
+        $list[2] = 'ok';
+        $safe = $list;
+        unset($safe[1]);
+        $this->assertEquals($safe, $input->getSafe()['list']);
+        $all = $list;
+        $all[1] = 'b@d';
+        $this->assertEquals($all, $input->getAll()['list']);
+        $this->assertEquals(array(1 => 'invalid input'), $input->getMessages()['list']);
+    }
 }
