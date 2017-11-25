@@ -118,6 +118,20 @@ class Verifiers
      * @param ValueTO $v
      * @param         $p
      */
+    public function filter_inKey($v, $p)
+    {
+        if (is_string($p)) {
+            $p = explode(',', $p);
+        }
+        if (!array_key_exists($v->getValue(), $p)) {
+            $v->setError(__METHOD__, $p);
+        }
+    }
+
+    /**
+     * @param ValueTO $v
+     * @param         $p
+     */
     public function filter_sameAs($v, $p)
     {
         if ($v->getValue() !== $p) {

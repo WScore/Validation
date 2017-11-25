@@ -170,6 +170,7 @@ All the verifiers, i.e. check if the value satisfies the requirements:
  * `range(array $range)`:              range of [min, max].
  * `datetime(string|bool $format = true)`:    checks for datetime with format. 
  * `in(array $choices)`:               checks for list of possible values. 
+ * `inKey(array $choices)`:            checks if the value is defined in as keys (faster than `in`). 
  * `confirm(string $key)`:             confirm against another $key. 
 
 

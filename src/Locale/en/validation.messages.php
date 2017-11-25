@@ -23,6 +23,7 @@ return array(
     'encoding'  => 'invalid encoding',
     'required'  => 'required item',
     'in'        => 'invalid choice',
+    'inKey'     => 'invalid choice',
     'sameAs'    => 'value not the same',
     'sameEmpty' => 'missing value to compare',
     'max'       => 'exceeds max value',

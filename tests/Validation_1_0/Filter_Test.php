@@ -174,7 +174,6 @@ class Filter_Test extends \PHPUnit_Framework_TestCase
     {
         /**
          * @param ValueTO $v
-         * @return string
          */
         $closure = function( $v ) {
             $val = $v->getValue();
@@ -269,6 +268,18 @@ class Filter_Test extends \PHPUnit_Framework_TestCase
     {
         $bad = '1234567890123456789012345678901234567890';
         $value = $this->validate->is( $bad, array( 'datetime'=>true));
+        $this->assertEquals( '', (string) $value );
+    }
+
+    /**
+     * @test
+     */
+    function inKey_filter()
+    {
+        $keys = ['good' => true, 'test' => true];
+        $value = $this->validate->is( 'good', ['inKey' => $keys]);
+        $this->assertEquals( 'good', (string) $value );
+        $value = $this->validate->is( 'bad', ['inKey' => $keys]);
         $this->assertEquals( '', (string) $value );
     }
 }
