@@ -123,6 +123,9 @@ class Verifiers
         if (is_string($p)) {
             $p = explode(',', $p);
         }
+        if (!is_array($p)) {
+            throw new \InvalidArgumentException('specify keys for inKey. ');
+        }
         if (!array_key_exists($v->getValue(), $p)) {
             $v->setError(__METHOD__, $p);
         }
@@ -158,7 +161,7 @@ class Verifiers
     {
         $val = (int)$v->getValue();
         if ($val > (int)$p) {
-            $v->setError(__METHOD__);
+            $v->setError(__METHOD__, $p);
         }
     }
 
@@ -170,7 +173,33 @@ class Verifiers
     {
         $val = (int)$v->getValue();
         if ($val < (int)$p) {
-            $v->setError(__METHOD__);
+            $v->setError(__METHOD__, $p);
+        }
+    }
+
+    /**
+     * @param ValueTO $v
+     * @param         $p
+     */
+    public function filter_range($v, $p)
+    {
+        if (is_string($p)) {
+            $p = explode(',', $p, 2);
+        }
+        if (!is_array($p)) {
+            throw new \InvalidArgumentException('range must be an array');
+        }
+        if (!array_key_exists(0, $p) || !array_key_exists(1, $p)) {
+            throw new \InvalidArgumentException('range does not have min or max values');
+        }
+        $min = (int) $p[0];
+        $max = (int) $p[1];
+        $val = (int)$v->getValue();
+        if ($val < $min) {
+            $v->setError(__METHOD__, $p);
+        }
+        if ($val > $max) {
+            $v->setError(__METHOD__, $p);
         }
     }
 

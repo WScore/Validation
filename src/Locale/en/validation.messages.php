@@ -28,6 +28,7 @@ return array(
     'sameEmpty' => 'missing value to compare',
     'max'       => 'exceeds max value',
     'min'       => 'below min value',
+    'range'     => 'out of range',
     // 2. message for matches and parameter
     'matches' => [
         Rules::MATCH_NUMBER  => 'only numbers (0-9)',

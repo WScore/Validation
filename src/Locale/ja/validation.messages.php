@@ -26,8 +26,9 @@ return array(
     'inKey'     => '選択できない値です',
     'sameAs'    => '入力内容が一致しません',
     'sameEmpty' => '確認用の項目を入力ください',
-    'max'       => '最大値を超えています。',
-    'min'       => '最小値より小さい値です。',
+    'max'       => '最大値を超えています',
+    'min'       => '最小値より小さい値です',
+    'range'     => '範囲から外れてます',
     // 2. message for matches and parameter
     'matches' => [
         Rules::MATCH_NUMBER  => '数値のみです(0-9)',

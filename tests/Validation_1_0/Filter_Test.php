@@ -281,5 +281,27 @@ class Filter_Test extends \PHPUnit_Framework_TestCase
         $this->assertEquals( 'good', (string) $value );
         $value = $this->validate->is( 'bad', ['inKey' => $keys]);
         $this->assertEquals( '', (string) $value );
+
+        $valTO = $this->validate->apply( 'bad', ['inKey' => $keys]);
+        $this->assertEquals( 'invalid choice', $valTO->message() );
+    }
+
+    /**
+     * @test
+     */
+    function inKey_range()
+    {
+        $range = [1, 3];
+        $value = $this->validate->is( 0, ['range' => $range]);
+        $this->assertEquals( '', (string) $value );
+        $value = $this->validate->is( 1, ['range' => $range]);
+        $this->assertEquals( '1', (string) $value );
+        $value = $this->validate->is( 3, ['range' => $range]);
+        $this->assertEquals( '3', (string) $value );
+        $value = $this->validate->is( 4, ['range' => $range]);
+        $this->assertEquals( '', (string) $value );
+
+        $valTO = $this->validate->apply( 4, ['range' => $range]);
+        $this->assertEquals( 'out of range', $valTO->message() );
     }
 }
