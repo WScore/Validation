@@ -164,7 +164,7 @@ All the verifiers, i.e. check if the value satisfies the requirements:
     * `mbOnlyKatakana()`: verifies only zenkaku katakana. 
     * `mbOnlyHiragana()`: verifies only zenkaku hiragana. 
     * `mbOnlyHankaku()`: verifies only hankaku characters (i.e. ASCII). 
-    * `mbOnlyHankakuKatakana()`: verifies only hankaku characters. 
+    * `mbOnlyHankakuKatakana()`: verifies only hankaku katakana. 
  * `min(int $min)`:                    minimum numeric value.
  * `max(int $max)`:                    maximum numeric value.
  * `range(array $range)`:              range of [min, max].
@@ -274,7 +274,7 @@ $input->asText('test')->addCustom('myFilter', $filter);
 ```
 
 You cannot pass parameter (the closure is the parameter).
-argument is the ValueTO object which can be used to handle
+argument is the `ValueTO` object which can be used to handle
 error and messages.
 
 Setting an error to ValueTO will break the filter loop, i.e. no further rules will be evaluated.
@@ -298,15 +298,19 @@ Setting error will make `fails()` method to return `true`.
 Modifying Error Messages
 ------------------
 
-To use your own messages, create a file at `your/path/<locale>/validation.messages.php`, 
-then construct the validation as;
+To use your own messages, create a directory such as `your/path/<locale>`, 
+then, create or copy the following files.
+
+* `validation.filters.php`
+* `validation.messages.php`
+* `validation.types.php`
 
 ```php
 $factory = new ValidationFactory('locale', 'your/path');
 $input = $factory->on($_POST);
 ``` 
 
-The `validation.messages.php` should return an array looks like: 
+The `validation.messages.php` file contains the default error messages as an array that looks like: 
 
 ```php
 return array(
