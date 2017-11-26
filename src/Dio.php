@@ -61,7 +61,6 @@ class Dio
     {
         $this->verify = $verify;
         $this->ruler  = $rules;
-        $this->found  = new ValueArray();
     }
 
     /**
@@ -71,6 +70,8 @@ class Dio
     {
         $this->source = $data;
         $this->isEvaluated = false;
+        $this->err_num = 0;
+        $this->found = new ValueArray();
     }
 
     /**
