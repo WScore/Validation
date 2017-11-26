@@ -19,21 +19,6 @@ class ValidationFactory
     private $dir = '';
 
     /**
-     * @var Rules
-     */
-    private $rules;
-
-    /**
-     * @var Verify
-     */
-    private $verify;
-
-    /**
-     * @var Dio
-     */
-    private $dio;
-
-    /**
      * @var FilterInterface
      */
     private $filter;
@@ -44,10 +29,7 @@ class ValidationFactory
      */
     public function __construct($locale = null, $dir = null)
     {
-        $this->dir = __DIR__ . '/Locale/';
-        if (!is_null($locale)) {
-            $this->setLocale($locale, $dir);
-        }
+        $this->setLocale($locale, $dir);
     }
 
     /**
@@ -57,7 +39,7 @@ class ValidationFactory
     public function setLocale($locale = null, $dir = null)
     {
         $this->locale = $locale ?: $this->locale;
-        $this->dir    = $dir ?: $this->dir;
+        $this->dir    = $dir ?: __DIR__ . '/Locale/';
         $this->dir    = rtrim($this->dir, '/') . '/';
 
         $this->factory();
@@ -77,10 +59,7 @@ class ValidationFactory
      */
     public function on(array $data = [])
     {
-        if (!$this->dio) {
-            $this->factory();
-        }
-        $dio = clone($this->dio);
+        $dio = $this->factory();
         $dio->source($data);
 
         return $dio;
@@ -91,21 +70,18 @@ class ValidationFactory
      */
     public function verify()
     {
-        if (!$this->verify) {
-            $this->factory();
-        }
-
-        return $this->verify;
-    }
-
-    private function factory()
-    {
-        $this->rules  = $this->rules();
-        $this->verify = new Verify(
+        return new Verify(
             $this->filter ?: new Filter(),
             new ValueTO(new Message($this->locale, $this->dir))
         );
-        $this->dio    = new Dio($this->verify, $this->rules);
+    }
+
+    /**
+     * @return Dio
+     */
+    private function factory()
+    {
+        return new Dio($this->verify(), $this->rules());
     }
 
     /**
