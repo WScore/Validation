@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: asao
- * Date: 2014/05/30
- * Time: 16:39
- */
 namespace WScore\Validation\Utils;
 
 

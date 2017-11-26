@@ -1,9 +1,6 @@
 <?php
 namespace WScore\Validation\Utils;
 
-use WScore\Validation\Dio;
-use WScore\Validation\Rules;
-
 class HelperMultiple
 {
     // +----------------------------------------------------------------------+

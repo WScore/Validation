@@ -2,11 +2,10 @@
 namespace WScore\Validation\Filter;
 
 use WScore\Validation\Rules;
-use WScore\Validation\Utils\Filter;
 use WScore\Validation\Utils\Helper;
 use WScore\Validation\Utils\ValueTO;
 
-class Sanitizers
+class Sanitizers extends AbstractFilter
 {
     /**
      * removes null from text.

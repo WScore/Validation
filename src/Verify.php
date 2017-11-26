@@ -1,10 +1,10 @@
 <?php
 namespace WScore\Validation;
 
+use WScore\Validation\Filter\FilterInterface;
 use WScore\Validation\Utils\ValueArray;
 use WScore\Validation\Utils\ValueTO;
 use WScore\Validation\Utils\ValueToInterface;
-use WScore\Validation\Utils\Filter;
 
 /**
  * Class Validate
@@ -14,7 +14,7 @@ use WScore\Validation\Utils\Filter;
 class Verify
 {
     /**
-     * @var Filter
+     * @var FilterInterface
      */
     private $filter;
 
@@ -27,7 +27,7 @@ class Verify
     //  construction
     // +----------------------------------------------------------------------+
     /**
-     * @param Filter  $filter
+     * @param FilterInterface  $filter
      * @param ValueTO $valueTO
      */
     public function __construct($filter = null, $valueTO = null)
@@ -93,7 +93,6 @@ class Verify
      */
     public function applyFilters($value, $rules = array())
     {
-        /** @var $filter Filter */
         $valueTO = $this->valueTO->forge($value);
         // loop through all the rules to validate $value.
         foreach ($rules as $rule => $parameter) {
@@ -111,20 +110,4 @@ class Verify
 
         return $valueTO;
     }
-
-    /**
-     * @param string $rule
-     * @param ValueTO $valueTO
-     * @param mixed $parameter
-     */
-    private function applyFilterMethod($rule, $valueTO, $parameter)
-    {
-        $method = 'filter_' . $rule;
-        if (method_exists($this->filter, $method)) {
-            $this->filter->$method($valueTO, $parameter);
-        } elseif (is_callable($parameter)) {
-            $this->filter->applyClosure($valueTO, $parameter);
-        }
-    }
-    // +----------------------------------------------------------------------+
 }

@@ -1,7 +1,8 @@
 <?php
 namespace WScore\Validation;
 
-use WScore\Validation\Utils\Filter;
+use WScore\Validation\Filter\FilterInterface;
+use WScore\Validation\Filter\Filter;
 use WScore\Validation\Utils\Message;
 use WScore\Validation\Utils\ValueTO;
 
@@ -33,6 +34,11 @@ class ValidationFactory
     private $dio;
 
     /**
+     * @var FilterInterface
+     */
+    private $filter;
+
+    /**
      * @param null|string $locale
      * @param null|string $dir
      */
@@ -55,6 +61,14 @@ class ValidationFactory
         $this->dir    = rtrim($this->dir, '/') . '/';
 
         $this->factory();
+    }
+
+    /**
+     * @param FilterInterface $filter
+     */
+    public function setFilter($filter)
+    {
+        $this->filter = $filter;
     }
 
     /**
@@ -88,7 +102,7 @@ class ValidationFactory
     {
         $this->rules  = $this->rules();
         $this->verify = new Verify(
-            new Filter(),
+            $this->filter ?: new Filter(),
             new ValueTO(new Message($this->locale, $this->dir))
         );
         $this->dio    = new Dio($this->verify, $this->rules);

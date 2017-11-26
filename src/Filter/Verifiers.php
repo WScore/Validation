@@ -5,7 +5,7 @@ use WScore\Validation\Rules;
 use WScore\Validation\Utils\Helper;
 use WScore\Validation\Utils\ValueTO;
 
-class Verifiers
+class Verifiers extends AbstractFilter
 {
     /**
      * checks if the $value has some value.

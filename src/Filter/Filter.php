@@ -1,60 +1,55 @@
 <?php
-namespace WScore\Validation\Utils;
+namespace WScore\Validation\Filter;
 
-use WScore\Validation\Filter\Sanitizers;
-use WScore\Validation\Filter\Verifiers;
+use WScore\Validation\Utils\ValueTO;
 
-class Filter
+class Filter extends AbstractFilter
 {
     public static $charCode = 'UTF-8';
 
     /**
-     * @var array
+     * @var FilterInterface[]
      */
     private $filters = [];
 
-    // +----------------------------------------------------------------------+
     /**
+     * @param FilterInterface[] $filters
      */
-    public function __construct()
+    public function __construct($filters = [])
     {
-        $this->filters[] = new Sanitizers();
-        $this->filters[] = new Verifiers();
+        if ($filters) {
+            $this->filters = $filters;
+        } else {
+            $this->filters[] = new Sanitizers();
+            $this->filters[] = new Verifiers();
+        }
     }
 
     /**
      * @param string  $rule
      * @param ValueTO $valueTO
      * @param mixed   $parameter
+     * @return bool
      */
     public function apply($rule, ValueTO $valueTO, $parameter)
     {
         $method = 'filter_' . $rule;
+        if (!is_string($parameter) && is_callable($parameter)) {
+            $parameter($valueTO, $parameter);
+            return true;
+        }
         if (method_exists($this, $method)) {
             $this->$method($valueTO, $parameter);
-            return;
+            return true;
         }
         foreach($this->filters as $filter) {
-            if (method_exists($filter, $method)) {
-                $filter->$method($valueTO, $parameter);
-                return;
+            if ($filter->apply($rule, $valueTO, $parameter)) {
+                return true;
             }
         }
-        if (!is_string($parameter) && is_callable($parameter)) {
-            $this->applyClosure($valueTO, $parameter);
-            return;
-        }
+        return false;
     }
-
-    /**
-     * @param ValueTO  $v
-     * @param \Closure $closure
-     */
-    public function applyClosure($v, $closure)
-    {
-        $closure($v);
-    }
-
+    
     // +----------------------------------------------------------------------+
     //  filter definitions (filters that alters the value).
     // +----------------------------------------------------------------------+
